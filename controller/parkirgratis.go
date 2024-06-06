@@ -17,6 +17,18 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteResponse(respw, http.StatusBadRequest, resp)
+		return
 	}
 	helper.WriteResponse(respw, http.StatusOK, kor)
+}
+
+func GetMarker(respw http.ResponseWriter, req *http.Request) {
+	var resp itmodel.Response
+	mar, err := atdb.GetAllDoc[[]model.Koordinat](config.Mongoconn, "marker", bson.M{})
+	if err != nil {
+		resp.Response = err.Error()
+		helper.WriteResponse(respw, http.StatusBadRequest, mar)
+		return
+	}
+	helper.WriteResponse(respw, http.StatusOK, mar)
 }

@@ -18,8 +18,10 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case method == "GET" && path == "/":
 		controller.GetHome(w, r)
-	case method == "GET" && path == "/refresh/token":
-		controller.GetNewToken(w, r)
+	case method == "GET" && path == "/data/lokasi":
+		controller.GetLokasi(w, r)
+	case method == "GET" && path == "/data/marker":
+		controller.GetMarker(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
 		controller.PostInboxNomor(w, r)
 	default:

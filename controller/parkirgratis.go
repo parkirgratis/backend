@@ -16,10 +16,10 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	kor, err := atdb.GetAllDoc[[]model.Tempat](config.Mongoconn, "tempat", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
-		helper.WriteResponse(respw, http.StatusBadRequest, resp)
+		helper.WriteJSON(respw, http.StatusBadRequest, resp)
 		return
 	}
-	helper.WriteResponse(respw, http.StatusOK, kor)
+	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
@@ -27,8 +27,8 @@ func GetMarker(respw http.ResponseWriter, req *http.Request) {
 	mar, err := atdb.GetOneLatestDoc[model.Koordinat](config.Mongoconn, "marker", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
-		helper.WriteResponse(respw, http.StatusBadRequest, mar)
+		helper.WriteJSON(respw, http.StatusBadRequest, mar)
 		return
 	}
-	helper.WriteResponse(respw, http.StatusOK, mar)
+	helper.WriteJSON(respw, http.StatusOK, mar)
 }

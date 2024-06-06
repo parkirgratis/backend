@@ -1,7 +1,6 @@
 package route
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -13,9 +12,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	if config.SetAccessControlHeaders(w, r) {
 		return
 	}
-	if config.ErrorMongoconn != nil {
-		log.Println(config.ErrorMongoconn.Error())
-	}
+	config.SetEnv()
 
 	var method, path string = r.Method, r.URL.Path
 	switch {

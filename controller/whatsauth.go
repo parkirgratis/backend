@@ -12,7 +12,7 @@ import (
 func GetHome(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
 	resp.Response = helper.GetIPaddress()
-	helper.WriteResponse(respw, http.StatusOK, resp)
+	helper.WriteJSON(respw, http.StatusOK, resp)
 }
 
 func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
@@ -22,14 +22,14 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 	prof, err := helper.GetAppProfile(waphonenumber, config.Mongoconn)
 	if err != nil {
 		resp.Response = err.Error()
-		helper.WriteResponse(respw, http.StatusServiceUnavailable, resp)
+		helper.WriteJSON(respw, http.StatusServiceUnavailable, resp)
 		return
 	}
 	if helper.GetSecretFromHeader(req) == prof.Secret {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
 			resp.Response = err.Error()
-			helper.WriteResponse(respw, http.StatusBadRequest, resp)
+			helper.WriteJSON(respw, http.StatusBadRequest, resp)
 			return
 		} else if msg.Message != "" {
 			_, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
@@ -40,16 +40,16 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 			if err != nil {
 				resp.Response = err.Error()
 			}
-			helper.WriteResponse(respw, http.StatusOK, resp)
+			helper.WriteJSON(respw, http.StatusOK, resp)
 			return
 		} else {
 			resp.Response = "pesan kosong"
-			helper.WriteResponse(respw, http.StatusOK, resp)
+			helper.WriteJSON(respw, http.StatusOK, resp)
 			return
 		}
 	}
 	resp.Response = "Wrong Secret"
-	helper.WriteResponse(respw, http.StatusForbidden, resp)
+	helper.WriteJSON(respw, http.StatusForbidden, resp)
 }
 
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
@@ -76,11 +76,11 @@ func GetNewToken(respw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	helper.WriteResponse(respw, httpstatus, resp)
+	helper.WriteJSON(respw, httpstatus, resp)
 }
 
 func NotFound(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
 	resp.Response = "Not Found"
-	helper.WriteResponse(respw, http.StatusNotFound, resp)
+	helper.WriteJSON(respw, http.StatusNotFound, resp)
 }

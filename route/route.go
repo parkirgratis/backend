@@ -24,6 +24,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetMarker(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
 		controller.PostInboxNomor(w, r)
+	case method == "POST" && path == "/tempat-parkir":
+		controller.PostTempatParkir(w, r)
 	default:
 		controller.NotFound(w, r)
 	}

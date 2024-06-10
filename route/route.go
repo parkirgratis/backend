@@ -26,6 +26,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostInboxNomor(w, r)
 	case method == "POST" && path == "/tempat-parkir":
 		controller.PostTempatParkir(w, r)
+	case method == "POST" && path == "/koordinat":
+		controller.PostKoordinat(w, r)
 	default:
 		controller.NotFound(w, r)
 	}

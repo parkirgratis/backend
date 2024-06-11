@@ -53,17 +53,23 @@ func InsertTempat(db *mongo.Database, col string, tempat model.Tempat) (inserted
 }
 
 func InsertKoordinat(db *mongo.Database, col string, koordinat model.Koordinat) (insertedID primitive.ObjectID, err error) {
-	// Menyisipkan data koordinat ke dalam koleksi MongoDB yang ditentukan
-	result, err := db.Collection(col).InsertOne(context.Background(), koordinat)
+	// Fungsi ini bertujuan untuk menyimpan data koordinat ke dalam koleksi MongoDB yang telah ditentukan.
+	// Data koordinat yang akan disimpan adalah array dari koordinat yang terdapat pada objek koordinat.
+	data := bson.M{"marker": koordinat.Markers}
+
+	// Melakukan penyisipan data ke dalam koleksi MongoDB.
+	result, err := db.Collection(col).InsertOne(context.Background(), data)
 	if err != nil {
-		// Jika terjadi error saat penyisipan, tampilkan error dan hentikan fungsi
+		// Jika terjadi kesalahan saat menyisipkan data, cetak pesan error dan hentikan eksekusi fungsi.
 		fmt.Printf("InsertKoordinat: %v\n", err)
 		return
 	}
 
-	// Mengambil ID dari dokumen yang baru disisipkan
+	// Setelah data berhasil disisipkan, ambil ID dari dokumen yang baru saja disisipkan.
 	insertedID = result.InsertedID.(primitive.ObjectID)
-	return insertedID, nil // Mengembalikan ID yang disisipkan dan error nil (tidak ada error)
+
+	// Mengembalikan ID yang telah disisipkan dan tidak ada error yang terjadi (nil).
+	return insertedID, nil
 }
 
 // PostTempatParkir adalah fungsi yang menangani permintaan POST untuk menyimpan data tempat parkir baru.
@@ -99,7 +105,6 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
 		return
 	}
-
 	// Memanggil fungsi InsertKoordinat untuk menyisipkan data ke dalam database
 	insertedID, err := InsertKoordinat(config.Mongoconn, "marker", data)
 	if err != nil {
@@ -107,7 +112,6 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
 		return
 	}
-
 	// Mengirimkan respons sukses dengan ID dari data yang baru disisipkan
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Koordinat berhasil disimpan dengan ID: %s", insertedID.Hex())})
 }

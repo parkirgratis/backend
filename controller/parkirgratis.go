@@ -55,7 +55,7 @@ func InsertTempat(db *mongo.Database, col string, tempat model.Tempat) (inserted
 func InsertKoordinat(db *mongo.Database, col string, koordinat model.Koordinat) (insertedID primitive.ObjectID, err error) {
 	// Fungsi ini bertujuan untuk menyimpan data koordinat ke dalam koleksi MongoDB yang telah ditentukan.
 	// Data koordinat yang akan disimpan adalah array dari koordinat yang terdapat pada objek koordinat.
-	data := bson.M{"marker": koordinat.Markers}
+	data := bson.M{"markers": koordinat.Markers}
 
 	// Melakukan penyisipan data ke dalam koleksi MongoDB.
 	result, err := db.Collection(col).InsertOne(context.Background(), data)

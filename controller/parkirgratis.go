@@ -78,7 +78,7 @@ func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Memanggil fungsi InsertTempat untuk menyisipkan data ke dalam database
-	insertedID, err := InsertTempat(config.Mongoconn, "tempat_parkir", data)
+	insertedID, err := InsertTempat(config.Mongoconn, "tempat", data)
 	if err != nil {
 		// Jika terjadi kesalahan saat menyisipkan data, kirimkan pesan kesalahan
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
@@ -101,7 +101,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Memanggil fungsi InsertKoordinat untuk menyisipkan data ke dalam database
-	insertedID, err := InsertKoordinat(config.Mongoconn, "koordinat", data)
+	insertedID, err := InsertKoordinat(config.Mongoconn, "marker", data)
 	if err != nil {
 		// Jika terjadi kesalahan saat menyisipkan data, kirimkan pesan kesalahan
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})

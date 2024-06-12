@@ -52,26 +52,6 @@ func InsertTempat(db *mongo.Database, col string, tempat model.Tempat) (inserted
 	return insertedID, nil // Mengembalikan ID yang disisipkan dan error nil (tidak ada error)
 }
 
-func InsertKoordinat(db *mongo.Database, col string, koordinat model.Koordinat) (insertedID primitive.ObjectID, err error) {
-	// Fungsi ini bertujuan untuk menyimpan data koordinat ke dalam koleksi MongoDB yang telah ditentukan.
-	// Data koordinat yang akan disimpan adalah array dari koordinat yang terdapat pada objek koordinat.
-	data := bson.M{"markers": koordinat.Markers}
-
-	// Melakukan penyisipan data ke dalam koleksi MongoDB.
-	result, err := db.Collection(col).InsertOne(context.Background(), data)
-	if err != nil {
-		// Jika terjadi kesalahan saat menyisipkan data, cetak pesan error dan hentikan eksekusi fungsi.
-		fmt.Printf("InsertKoordinat: %v\n", err)
-		return
-	}
-
-	// Setelah data berhasil disisipkan, ambil ID dari dokumen yang baru saja disisipkan.
-	insertedID = result.InsertedID.(primitive.ObjectID)
-
-	// Mengembalikan ID yang telah disisipkan dan tidak ada error yang terjadi (nil).
-	return insertedID, nil
-}
-
 // PostTempatParkir adalah fungsi yang menangani permintaan POST untuk menyimpan data tempat parkir baru.
 func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	// Membaca data dari body permintaan
@@ -95,23 +75,27 @@ func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Tempat parkir berhasil disimpan dengan ID: %s", insertedID.Hex())})
 }
 
-// PostKoordinat adalah fungsi yang menangani permintaan POST untuk menyimpan data koordinat baru.
 func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
-	// Membaca data dari body permintaan
-	var data model.Koordinat
-	err := json.NewDecoder(req.Body).Decode(&data)
-	if err != nil {
-		// Jika terjadi kesalahan dalam mendekode data, kirimkan pesan kesalahan
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
+	var newKoor model.Koordinat
+	if err := json.NewDecoder(req.Body).Decode(&newKoor); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
 		return
 	}
-	// Memanggil fungsi InsertKoordinat untuk menyisipkan data ke dalam database
-	insertedID, err := InsertKoordinat(config.Mongoconn, "marker", data)
+
+	// Set the specific ID you want to update
+	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
 	if err != nil {
-		// Jika terjadi kesalahan saat menyisipkan data, kirimkan pesan kesalahan
-		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
-	// Mengirimkan respons sukses dengan ID dari data yang baru disisipkan
-	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Koordinat berhasil disimpan dengan ID: %s", insertedID.Hex())})
+
+	// Create filter and update fields
+	filter := bson.M{"_id": id}
+	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
+
+	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, "Markers updated")
 }

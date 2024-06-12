@@ -13,5 +13,6 @@ type Tempat struct {
 }
 
 type Koordinat struct {
+	ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Markers [][]float64 `json:"markers"`
 }

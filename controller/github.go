@@ -5,32 +5,34 @@ import (
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
+	"github.com/gocroot/model"
+	"go.mongodb.org/mongo-driver/bson"
 
+	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/helper/ghupload"
-	"github.com/gocroot/helper/watoken"
 	"github.com/whatsauth/itmodel"
 )
 
-func PostUploadGithub(respw http.ResponseWriter, req *http.Request) {
+func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 	var respn itmodel.Response
-	_, err := watoken.Decode(config.PublicKeyWhatsAuth, helper.GetLoginFromHeader(req))
-	if err != nil {
-		respn.Info = helper.GetSecretFromHeader(req)
-		respn.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusForbidden, respn)
-		return
-	}
+	// _, err := watoken.Decode(config.PublicKeyWhatsAuth, helper.GetLoginFromHeader(req))
+	// if err != nil {
+	// 	respn.Info = helper.GetSecretFromHeader(req)
+	// 	respn.Response = err.Error()
+	// 	helper.WriteJSON(respw, http.StatusForbidden, respn)
+	// 	return
+	// }
 	// Parse the form file
-	_, header, err := req.FormFile("image")
+	_, header, err := r.FormFile("image")
 	if err != nil {
-		respn.Info = helper.GetSecretFromHeader(req)
+
 		respn.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusForbidden, respn)
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
 		return
 	}
 
 	//folder := ctx.Params("folder")
-	folder := helper.GetParam(req)
+	folder := helper.GetParam(r)
 	var pathFile string
 	if folder != "" {
 		pathFile = folder + "/" + header.Filename
@@ -39,14 +41,23 @@ func PostUploadGithub(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// save to github
-	content, _, err := ghupload.GithubUpload(config.GitHubAccessToken, config.GitHubAuthorName, config.GitHubAuthorEmail, header, "parkirgratis.github.io", "release", pathFile, false)
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
 	if err != nil {
-		respn.Info = "gagal upload gambar"
+		respn.Info = helper.GetSecretFromHeader(r)
 		respn.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusForbidden, content)
+		helper.WriteJSON(w, http.StatusConflict, respn)
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, respn)
+	content, _, err := ghupload.GithubUpload(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header, "parkirgratis", "parkirgratis.github.io", pathFile, false)
+	if err != nil {
+		respn.Info = "gagal upload github"
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusEarlyHints, content)
+		return
+	}
+	respn.Info = *content.Content.Name
+	respn.Response = *content.Content.Path
+	helper.WriteJSON(w, http.StatusOK, respn)
 
 }

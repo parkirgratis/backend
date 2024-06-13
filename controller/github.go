@@ -21,7 +21,7 @@ func PostUploadGithub(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// Parse the form file
-	_, header, err := req.FormFile("file")
+	_, header, err := req.FormFile("image")
 	if err != nil {
 		respn.Info = helper.GetSecretFromHeader(req)
 		respn.Response = err.Error()
@@ -39,9 +39,9 @@ func PostUploadGithub(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// save to github
-	content, _, err := ghupload.GithubUpload(config.GitHubAccessToken, config.GitHubAuthorName, config.GitHubAuthorEmail, header, "repoulbi", "sk", pathFile, false)
+	content, _, err := ghupload.GithubUpload(config.GitHubAccessToken, config.GitHubAuthorName, config.GitHubAuthorEmail, header, "parkirgratis.github.io", "release", pathFile, false)
 	if err != nil {
-		respn.Info = "gagal upload github"
+		respn.Info = "gagal upload gambar"
 		respn.Response = err.Error()
 		helper.WriteJSON(respw, http.StatusForbidden, content)
 		return

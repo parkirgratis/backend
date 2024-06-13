@@ -13,7 +13,6 @@ import (
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetLokasi(respw http.ResponseWriter, req *http.Request) {
@@ -38,38 +37,24 @@ func GetMarker(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, mar)
 }
 
-func InsertTempat(db *mongo.Database, col string, tempat model.Tempat) (insertedID primitive.ObjectID, err error) {
-	// Menyisipkan data tempat ke dalam koleksi MongoDB yang ditentukan
-	result, err := db.Collection(col).InsertOne(context.Background(), tempat)
-	if err != nil {
-		// Jika terjadi error saat penyisipan, tampilkan error dan hentikan fungsi
-		fmt.Printf("InsertTempat: %v\n", err)
-		return
-	}
-
-	// Mengambil ID dari dokumen yang baru disisipkan
-	insertedID = result.InsertedID.(primitive.ObjectID)
-	return insertedID, nil // Mengembalikan ID yang disisipkan dan error nil (tidak ada error)
-}
-
 // PostTempatParkir adalah fungsi yang menangani permintaan POST untuk menyimpan data tempat parkir baru.
 func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	// Membaca data dari body permintaan
-	var data model.Tempat
-	err := json.NewDecoder(req.Body).Decode(&data)
-	if err != nil {
-		// Jika terjadi kesalahan dalam mendekode data, kirimkan pesan kesalahan
+	var tempatParkir model.Tempat
+	if err := json.NewDecoder(req.Body).Decode(&tempatParkir); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
 		return
 	}
 
-	// Memanggil fungsi InsertTempat untuk menyisipkan data ke dalam database
-	insertedID, err := InsertTempat(config.Mongoconn, "tempat", data)
+	// Menyisipkan data tempat ke dalam koleksi MongoDB yang ditentukan
+	result, err := config.Mongoconn.Collection("tempat").InsertOne(context.Background(), tempatParkir)
 	if err != nil {
-		// Jika terjadi kesalahan saat menyisipkan data, kirimkan pesan kesalahan
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
 		return
 	}
+
+	// Mengambil ID dari dokumen yang baru disisipkan
+	insertedID := result.InsertedID.(primitive.ObjectID)
 
 	// Mengirimkan respons sukses dengan ID dari data yang baru disisipkan
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Tempat parkir berhasil disimpan dengan ID: %s", insertedID.Hex())})

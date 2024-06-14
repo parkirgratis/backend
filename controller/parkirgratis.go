@@ -84,3 +84,24 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 	helper.WriteJSON(respw, http.StatusOK, "Markers updated")
 }
+
+func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
+	id := helper.GetParam(req)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+	var updatedTempatParkir model.Tempat
+	if err := json.NewDecoder(req.Body).Decode(&updatedTempatParkir); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+	filter := bson.M{"_id": objectID}
+	update := bson.M{"$set": updatedTempatParkir}
+	if _, err := atdb.UpdateDoc(config.Mongoconn, "tempat", filter, update); err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, updatedTempatParkir)
+}

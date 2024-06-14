@@ -105,3 +105,18 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	}
 	helper.WriteJSON(respw, http.StatusOK, updatedTempatParkir)
 }
+
+func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
+	var newTempatParkir model.Tempat
+	if err := json.NewDecoder(req.Body).Decode(&newTempatParkir); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+	filter := primitive.M{"nama_tempat": newTempatParkir.Nama_Tempat}
+	err  := atdb.DeleteOneDoc(config.Mongoconn, "tempat", filter)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, newTempatParkir)
+}

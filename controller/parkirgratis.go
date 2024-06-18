@@ -118,16 +118,21 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 
 
 func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
-	var newTempatParkir model.Tempat
-	if err := json.NewDecoder(req.Body).Decode(&newTempatParkir); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+	var tempatParkirToDelete model.Tempat
+	if err := json.NewDecoder(req.Body).Decode(&tempatParkirToDelete); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
-	filter := primitive.M{"nama_tempat": newTempatParkir.Nama_Tempat}
-	err  := atdb.DeleteOneDoc(config.Mongoconn, "tempat", filter)
+
+	filter := bson.M{"nama_tempat": tempatParkirToDelete.Nama_Tempat}
+
+	err := atdb.DeleteOneDoc(config.Mongoconn, "tempat", filter)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		helper.WriteJSON(respw, http.StatusInternalServerError, "Failed to delete document")
 		return
 	}
-	helper.WriteJSON(respw, http.StatusOK, newTempatParkir)
+
+	helper.WriteJSON(respw, http.StatusOK, "Document deleted successfully")
 }
+
+

@@ -67,14 +67,12 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Set the specific ID you want to update
 	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
-	// Create filter and update fields
 	filter := bson.M{"_id": id}
 	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
 
@@ -86,35 +84,41 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 }
 
 func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
-	id := helper.GetParam(req)
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
+	var newTempat model.Tempat
+	if err := json.NewDecoder(req.Body).Decode(&newTempat); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	var updatedTempatParkir model.Tempat
-	if err := json.NewDecoder(req.Body).Decode(&updatedTempatParkir); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid JSON data")
+	
+	fmt.Println("Decoded document:", newTempat)
+
+	if newTempat.ID.IsZero() {
+		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
 		return
 	}
 
-	filter := bson.M{"_id": objectID}
-	update := bson.M{"$set": updatedTempatParkir}
+	filter := bson.M{"_id": newTempat.ID}
+	update := bson.M{"$set": newTempat}
+	fmt.Println("Filter:", filter)
+	fmt.Println("Update:", update)
+
 
 	result, err := atdb.UpdateDoc(config.Mongoconn, "tempat", filter, update)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, "Failed to update document")
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	
 	if result.ModifiedCount == 0 {
-		helper.WriteJSON(respw, http.StatusNotFound, "Document not found")
+		helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, updatedTempatParkir)
+	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }
+
 
 
 func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
@@ -134,5 +138,3 @@ func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Document deleted successfully")
 }
-
-

@@ -41,7 +41,7 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// save to github
-	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "tempat", bson.M{})
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
 	if err != nil {
 		respn.Info = helper.GetSecretFromHeader(r)
 		respn.Response = err.Error()

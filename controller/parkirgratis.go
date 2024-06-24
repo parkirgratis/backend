@@ -71,7 +71,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Set the specific ID you want to update
-	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
+	id, err := primitive.ObjectIDFromHex("6679b77450a939208a4a7a28")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
@@ -196,7 +196,7 @@ func AdminLogin(respw http.ResponseWriter, req *http.Request) {
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 	var deleteRequest struct {
-		Index int `json:"index"`
+		Coordinates []float64 `json:"coordinates"`
 	}
 
 	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
@@ -204,7 +204,7 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
+	id, err := primitive.ObjectIDFromHex("6679b77450a939208a4a7a28")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
@@ -213,19 +213,12 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 	filter := bson.M{"_id": id}
 
 	update := bson.M{
-		"$set": bson.M{
-			fmt.Sprintf("markers.%d", deleteRequest.Index): nil,
-		},
-	}
-
-	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	update = bson.M{
 		"$pull": bson.M{
-			"markers": nil,
+			"markers": bson.M{
+				"$elemMatch": bson.M{
+					"$eq": deleteRequest.Coordinates,
+				},
+			},
 		},
 	}
 
@@ -234,7 +227,7 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, "Marker deleted")
+	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
 
 

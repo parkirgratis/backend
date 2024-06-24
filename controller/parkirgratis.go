@@ -196,7 +196,8 @@ func AdminLogin(respw http.ResponseWriter, req *http.Request) {
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 	var deleteRequest struct {
-		Coordinates []float64 `json:"coordinates"`
+		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+		Markers [][]float64 `json:"markers"`
 	}
 
 	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
@@ -204,20 +205,23 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("6679b77450a939208a4a7a28")
+	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
-	filter := bson.M{"_id": id}
+	filter := bson.M{
+		"_id": id,
+		"markers": bson.M{
+			"$in": deleteRequest.Markers,
+		},
+	}
 
 	update := bson.M{
 		"$pull": bson.M{
 			"markers": bson.M{
-				"$elemMatch": bson.M{
-					"$eq": deleteRequest.Coordinates,
-				},
+				"$in": deleteRequest.Markers,
 			},
 		},
 	}
@@ -229,6 +233,4 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
-
-
 

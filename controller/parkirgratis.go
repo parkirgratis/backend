@@ -195,8 +195,11 @@ func AdminLogin(respw http.ResponseWriter, req *http.Request) {
 
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
-	var deleteKoor model.Koordinat
-	if err := json.NewDecoder(req.Body).Decode(&deleteKoor); err != nil {
+	var deleteRequest struct {
+		Index int `json:"index"`
+	}
+
+	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -207,18 +210,32 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if len(deleteKoor.Markers) == 0 {
-		helper.WriteJSON(respw, http.StatusBadRequest, "No markers to delete")
-		return
-	}
-
-	firstMarker := deleteKoor.Markers[0]
 	filter := bson.M{"_id": id}
-	update := bson.M{"$pull": bson.M{"markers": firstMarker}}
+
+	update := bson.M{
+		"$set": bson.M{
+			fmt.Sprintf("markers.%d", deleteRequest.Index): nil,
+		},
+	}
 
 	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	update = bson.M{
+		"$pull": bson.M{
+			"markers": nil,
+		},
+	}
+
+	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	helper.WriteJSON(respw, http.StatusOK, "Marker deleted")
 }
+
+
+

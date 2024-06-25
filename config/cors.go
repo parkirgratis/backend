@@ -14,6 +14,7 @@ var Origins = []string{
 	"https://whatsauth.github.io",
 	"https://pmb.ulbi.ac.id",
 	"https://parkirgratis.github.io",
+	"https://parkirgratis.github.io.id",
 }
 
 var Headers = []string{

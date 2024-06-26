@@ -167,7 +167,6 @@ func AdminLogin(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	
 	clientOptions := options.Client().ApplyURI(config.MongoURI) // Assuming MongoURI is defined in your config
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -206,19 +205,13 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("6661898bb85c143abc747d03")
+	id, err := primitive.ObjectIDFromHex("6679b77450a939208a4a7a28")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
-	filter := bson.M{
-		"_id": id,
-		"markers": bson.M{
-			"$in": deleteRequest.Markers,
-		},
-	}
-
+	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$pull": bson.M{
 			"markers": bson.M{
@@ -234,4 +227,3 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
-

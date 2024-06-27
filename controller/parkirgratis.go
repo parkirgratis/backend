@@ -195,35 +195,29 @@ func AdminLogin(respw http.ResponseWriter, req *http.Request) {
 
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
-	var deleteRequest struct {
-		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-		Markers [][]float64 `json:"markers"`
-	}
+    var deleteRequest struct {
+        ID      primitive.ObjectID `json:"_id" bson:"_id"`
+        Markers [][]float64        `json:"markers"`
+    }
 
-	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
-		return
-	}
+    if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
+        helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+        return
+    }
 
-	id, err := primitive.ObjectIDFromHex("6679b77450a939208a4a7a28")
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
-		return
-	}
+    filter := bson.M{"_id": deleteRequest.ID}
+    update := bson.M{
+        "$pull": bson.M{
+            "markers": bson.M{
+                "$in": deleteRequest.Markers,
+            },
+        },
+    }
 
-	filter := bson.M{"_id": id}
-	update := bson.M{
-		"$pull": bson.M{
-			"markers": bson.M{
-				"$in": deleteRequest.Markers,
-			},
-		},
-	}
+    if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+        return
+    }
 
-	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
+    helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }

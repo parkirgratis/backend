@@ -28,7 +28,6 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the folder parameter
 	folder := helper.GetParam(r)
 	var pathFile string
 	if folder != "" {
@@ -37,7 +36,6 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 		pathFile = header.Filename
 	}
 
-	// Fetch GitHub credentials from the database
 	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
 	if err != nil {
 		fmt.Println("Error fetching GitHub credentials:", err)
@@ -47,17 +45,14 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Upload the file to GitHub
 	content, _, err := ghupload.GithubUpload(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header, "parkirgratis", "filegambar", pathFile, false)
 	if err != nil {
 		fmt.Println("Error uploading file to GitHub:", err)
 		respn.Info = "gagal upload github"
 		respn.Response = err.Error()
-		helper.WriteJSON(w, http.StatusEarlyHints, respn) // Changed `content` to `respn`
+		helper.WriteJSON(w, http.StatusEarlyHints, respn) 
 		return
 	}
-
-	// Check if content is nil
 	if content == nil || content.Content == nil {
 		fmt.Println("Error: content or content.Content is nil")
 		respn.Response = "Error uploading file"

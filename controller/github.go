@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -101,4 +102,61 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 	respn.Response = *content.Content.Path
 	helper.WriteJSON(w, http.StatusOK, respn)
 	fmt.Println("File upload process completed successfully")
+}
+
+func UpdateGithubFile(w http.ResponseWriter, r *http.Request) {
+	var respn itmodel.Response
+
+	// Parse multipart form
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
+		return
+	}
+
+	// Get the uploaded file
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
+		return
+	}
+	defer file.Close()
+
+	// Get the file name from form
+	fileName := r.FormValue("fileName")
+	if fileName == "" {
+		respn.Response = "File name is required"
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
+		return
+	}
+
+	// Get GitHub credentials from the database
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
+	if err != nil {
+		respn.Info = helper.GetSecretFromHeader(r)
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusConflict, respn)
+		return
+	}
+
+	// Create a multipart.FileHeader from the uploaded file
+	fileHeader := &multipart.FileHeader{
+		Filename: handler.Filename,
+		Header:   handler.Header,
+		Size:     handler.Size,
+	}
+
+	// Update the file in GitHub
+	content, _, err := ghupload.GithubUpdateFile(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, fileHeader, "parkirgratis", "filegambar", fileName)
+	if err != nil {
+		respn.Info = "Failed to update GitHub file"
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusInternalServerError, respn)
+		return
+	}
+
+	respn.Info = "File updated successfully"
+	respn.Response = *content.Content.Path
+	helper.WriteJSON(w, http.StatusOK, respn)
 }

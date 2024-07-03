@@ -76,3 +76,45 @@ func GithubUpload(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail string,
 
 	return
 }
+func GithubUpdateFile(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail string, fileHeader *multipart.FileHeader, githubOrg, githubRepo, pathFile string) (*github.RepositoryContentResponse, *github.Response, error) {
+	// Open the file
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close()
+
+	// Read the file content
+	fileContent, err := io.ReadAll(file)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Konfigurasi koneksi ke GitHub menggunakan token akses
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: GitHubAccessToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+	// Get the current file to retrieve the SHA
+	currentContent, _, _, err := client.Repositories.GetContents(ctx, githubOrg, githubRepo, pathFile, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	opts := &github.RepositoryContentFileOptions{
+		Message: github.String("Update file"),
+		Content: fileContent,
+		Branch:  github.String("main"),
+		SHA:     github.String(currentContent.GetSHA()),
+		Author: &github.CommitAuthor{
+			Name:  github.String(GitHubAuthorName),
+			Email: github.String(GitHubAuthorEmail),
+		},
+	}
+
+	// Update the file in the repository
+	return client.Repositories.UpdateFile(ctx, githubOrg, githubRepo, pathFile, opts)
+}

@@ -2,8 +2,8 @@ package ghupload
 
 import (
 	"context"
-	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 
 	"github.com/google/go-github/v59/github"
@@ -23,11 +23,12 @@ func GithubListFiles(GitHubAccessToken, githubOrg, githubRepo, path string) ([]*
 	// Mendapatkan daftar file dari repositori
 	_, directoryContent, _, err := client.Repositories.GetContents(ctx, githubOrg, githubRepo, path, nil)
 	if err != nil {
+		log.Printf("GetContents error: %v", err)
 		return nil, err
 	}
 
 	// Tambahkan logging untuk melihat data yang dikembalikan
-	fmt.Printf("GithubListFiles: %v\n", directoryContent)
+	log.Printf("GithubListFiles: %v", directoryContent)
 
 	return directoryContent, nil
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -16,12 +17,14 @@ import (
 )
 
 func GetGithubFiles(w http.ResponseWriter, r *http.Request) {
+	log.Println("GetGithubFiles: Received request")
 	var respn itmodel.Response
 
 	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
 	if err != nil {
 		respn.Info = helper.GetSecretFromHeader(r)
 		respn.Response = err.Error()
+		log.Printf("GetOneDoc error: %v", err)
 		helper.WriteJSON(w, http.StatusConflict, respn)
 		return
 	}
@@ -29,15 +32,17 @@ func GetGithubFiles(w http.ResponseWriter, r *http.Request) {
 	content, err := ghupload.GithubListFiles(gh.GitHubAccessToken, "parkirgratis", "filegambar", "img")
 	if err != nil {
 		respn.Response = err.Error()
+		log.Printf("GithubListFiles error: %v", err)
 		helper.WriteJSON(w, http.StatusInternalServerError, respn)
 		return
 	}
 
-	fmt.Printf("GetGithubFiles: %v\n", content)
+	log.Printf("GetGithubFiles: %v", content)
 
 	contentJSON, err := json.Marshal(content)
 	if err != nil {
 		respn.Response = err.Error()
+		log.Printf("json.Marshal error: %v", err)
 		helper.WriteJSON(w, http.StatusInternalServerError, respn)
 		return
 	}

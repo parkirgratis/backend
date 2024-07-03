@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -14,12 +15,43 @@ import (
 	"github.com/whatsauth/itmodel"
 )
 
+func GetGithubFiles(w http.ResponseWriter, r *http.Request) {
+	var respn itmodel.Response
+
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
+	if err != nil {
+		respn.Info = helper.GetSecretFromHeader(r)
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusConflict, respn)
+		return
+	}
+
+	content, err := ghupload.GithubListFiles(gh.GitHubAccessToken, "parkirgratis", "filegambar", "img")
+	if err != nil {
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusInternalServerError, respn)
+		return
+	}
+
+	fmt.Printf("GetGithubFiles: %v\n", content)
+
+	contentJSON, err := json.Marshal(content)
+	if err != nil {
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusInternalServerError, respn)
+		return
+	}
+
+	respn.Info = "Files retrieved successfully"
+	respn.Response = string(contentJSON)
+	helper.WriteJSON(w, http.StatusOK, respn)
+}
+
 func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 	var respn itmodel.Response
 
 	fmt.Println("Starting file upload process")
 
-	// Parse the form file
 	_, header, err := r.FormFile("img")
 	if err != nil {
 		fmt.Println("Error parsing form file:", err)
@@ -50,7 +82,7 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error uploading file to GitHub:", err)
 		respn.Info = "gagal upload github"
 		respn.Response = err.Error()
-		helper.WriteJSON(w, http.StatusEarlyHints, respn) 
+		helper.WriteJSON(w, http.StatusEarlyHints, respn)
 		return
 	}
 	if content == nil || content.Content == nil {

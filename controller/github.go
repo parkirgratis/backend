@@ -160,3 +160,36 @@ func UpdateGithubFile(w http.ResponseWriter, r *http.Request) {
 	respn.Response = *content.Content.Path
 	helper.WriteJSON(w, http.StatusOK, respn)
 }
+
+func DeleteGithubFile(w http.ResponseWriter, r *http.Request) {
+	var respn itmodel.Response
+	var deleteRequest struct {
+		FileName string `json:"fileName"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&deleteRequest); err != nil {
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
+		return
+	}
+
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
+	if err != nil {
+		respn.Info = helper.GetSecretFromHeader(r)
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusConflict, respn)
+		return
+	}
+
+	_, _, err = ghupload.GithubDeleteFile(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, "parkirgratis", "filegambar", deleteRequest.FileName)
+	if err != nil {
+		respn.Info = "Failed to delete GitHub file"
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusInternalServerError, respn)
+		return
+	}
+
+	respn.Info = "File deleted successfully"
+	respn.Response = deleteRequest.FileName
+	helper.WriteJSON(w, http.StatusOK, respn)
+}

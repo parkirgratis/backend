@@ -118,3 +118,36 @@ func GithubUpdateFile(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail str
 	// Update the file in the repository
 	return client.Repositories.UpdateFile(ctx, githubOrg, githubRepo, pathFile, opts)
 }
+
+func GithubDeleteFile(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail, githubOrg, githubRepo, pathFile string) (*github.RepositoryContentResponse, *github.Response, error) {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: GitHubAccessToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+	// Get the current file to retrieve the SHA
+	currentContent, _, _, err := client.Repositories.GetContents(ctx, githubOrg, githubRepo, pathFile, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	opts := &github.RepositoryContentFileOptions{
+		Message: github.String("Delete file"),
+		Branch:  github.String("main"),
+		SHA:     github.String(currentContent.GetSHA()),
+		Author: &github.CommitAuthor{
+			Name:  github.String(GitHubAuthorName),
+			Email: github.String(GitHubAuthorEmail),
+		},
+	}
+
+	// Delete the file from the repository
+	deleteResponse, response, err := client.Repositories.DeleteFile(ctx, githubOrg, githubRepo, pathFile, opts)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return deleteResponse, response, nil
+}

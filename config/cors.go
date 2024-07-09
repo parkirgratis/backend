@@ -1,13 +1,17 @@
 package config
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
-var Origins = []string{
+var AllowedOrigins = []string{
 	"https://parkirgratis.github.io",
 	"https://parkirgratis.github.io.id",
+	"https://parkirgratis.github.io/input",
 }
 
-var Headers = []string{
+var AllowedHeaders = []string{
 	"Origin",
 	"Content-Type",
 	"Accept",
@@ -21,20 +25,28 @@ var Headers = []string{
 }
 
 func SetAccessControlHeaders(w http.ResponseWriter, r *http.Request) bool {
-	// Set CORS headers for the preflight request
+	origin := r.Header.Get("Origin")
+	// Check if the origin is in the allowed origins list
+	allowedOrigin := false
+	for _, o := range AllowedOrigins {
+		if o == origin {
+			allowedOrigin = true
+			break
+		}
+	}
+	if !allowedOrigin {
+		return false
+	}
+
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", strings.Join(AllowedHeaders, ", "))
+	w.Header().Set("Access-Control-Allow-Origin", origin)
+
 	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Login")
-		w.Header().Set("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE")
-		w.Header().Set("Access-Control-Allow-Origin", "https://parkirgratis.github.io")
-		w.Header().Set("Access-Control-Allow-Origin", "https://parkirgratis.github.io/input")
-		w.Header().Set("Access-Control-Max-Age", "3600")
 		w.WriteHeader(http.StatusNoContent)
 		return true
 	}
-	// Set CORS headers for the main request.
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Origin", "https://parkirgratis.github.io")
-	w.Header().Set("Access-Control-Allow-Origin", "https://parkirgratis.github.io/input")
+
 	return false
 }

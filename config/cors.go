@@ -9,6 +9,7 @@ var AllowedOrigins = []string{
 	"https://parkirgratis.github.io",
 	"https://parkirgratis.github.io.id",
 	"https://parkirgratis.github.io/input",
+	"http://127.0.0.1:5500",
 }
 
 var AllowedHeaders = []string{
@@ -26,7 +27,7 @@ var AllowedHeaders = []string{
 
 func SetAccessControlHeaders(w http.ResponseWriter, r *http.Request) bool {
 	origin := r.Header.Get("Origin")
-	// Check if the origin is in the allowed origins list
+
 	allowedOrigin := false
 	for _, o := range AllowedOrigins {
 		if o == origin {
@@ -35,16 +36,17 @@ func SetAccessControlHeaders(w http.ResponseWriter, r *http.Request) bool {
 		}
 	}
 	if !allowedOrigin {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return false
 	}
 
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(AllowedHeaders, ", "))
 	w.Header().Set("Access-Control-Allow-Origin", origin)
 
 	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusOK)
 		return true
 	}
 

@@ -71,7 +71,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("6686473df162312b216c27d0")
+	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
@@ -204,7 +204,7 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("6686473df162312b216c27d0")
+	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return

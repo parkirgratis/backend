@@ -226,3 +226,67 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
+
+func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
+	var updateRequest struct {
+		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+		Markers [][]float64        `json:"markers"`
+	}
+
+	if err := json.NewDecoder(req.Body).Decode(&updateRequest); err != nil {
+		http.Error(respw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := updateRequest.ID
+	if id.IsZero() {
+		http.Error(respw, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	filter := bson.M{"_id": id}
+
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://irgifauzi:%40Sasuke123@webservice.rq9zk4m.mongodb.net/"))
+	if err != nil {
+		http.Error(respw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer client.Disconnect(context.TODO())
+
+	collection := client.Database("parkir_db").Collection("marker")
+
+	var document struct {
+		Markers [][]float64 `bson:"markers"`
+	}
+	if err := collection.FindOne(context.TODO(), filter).Decode(&document); err != nil {
+		http.Error(respw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var index int = -1
+	for i, marker := range document.Markers {
+		if len(marker) == 2 && marker[0] == updateRequest.Markers[0][0] && marker[1] == updateRequest.Markers[0][1] {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		http.Error(respw, "Marker not found", http.StatusBadRequest)
+		return
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			fmt.Sprintf("markers.%d", index): updateRequest.Markers[1],
+		},
+	}
+
+	if _, err := collection.UpdateOne(context.TODO(), filter, update); err != nil {
+		http.Error(respw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respw.WriteHeader(http.StatusOK)
+	respw.Write([]byte("Coordinate updated"))
+}

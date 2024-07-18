@@ -240,8 +240,12 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	id := updateRequest.ID
 	if id.IsZero() {
-		http.Error(respw, "ID is required", http.StatusBadRequest)
-		return
+		defaultID, err := primitive.ObjectIDFromHex("6686473df162312b216c27d0")
+		if err != nil {
+			http.Error(respw, "Invalid default ID", http.StatusInternalServerError)
+			return
+		}
+		id = defaultID
 	}
 
 	filter := bson.M{"_id": id}

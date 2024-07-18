@@ -240,7 +240,7 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	id := updateRequest.ID
 	if id.IsZero() {
-		defaultID, err := primitive.ObjectIDFromHex("6686473df162312b216c27d0")
+		defaultID, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 		if err != nil {
 			http.Error(respw, "Invalid default ID", http.StatusInternalServerError)
 			return

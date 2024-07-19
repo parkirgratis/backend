@@ -28,14 +28,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostTempatParkir(w, r)
 	case method == "POST" && path == "/koordinat":
 		controller.PostKoordinat(w, r)
-	case method == "GET" && helper.URLParam(path, "/files"):
-		controller.GetGithubFiles(w, r)
 	case method == "POST" && helper.URLParam(path, "/upload/:path"):
 		controller.PostUploadGithub(w, r)
-	case method == "PUT" && helper.URLParam(path, "/file/:path"):
-		controller.UpdateGithubFile(w, r)
-	case method == "DELETE" && helper.URLParam(path, "/file/:path"):
-		controller.DeleteGithubFile(w, r)
 	case method == "PUT" && path == "/data/tempat":
 		controller.PutTempatParkir(w, r)
 	case method == "PUT" && path == "/data/koordinat":

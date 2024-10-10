@@ -1,7 +1,9 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
+import (
+	"time"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 type Tempat struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Nama_Tempat string             `bson:"nama_tempat,omitempty" json:"nama_tempat,omitempty"`

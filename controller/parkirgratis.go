@@ -29,6 +29,24 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
+func GetAdminByUsername(username string) (model.Admin, error) {
+	var admin model.Admin
+
+	if config.ErrorMongoconn != nil {
+		return admin, fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+	}
+
+	adminCollection := config.Mongoconn.Collection("admin")
+	ctx := context.Background()
+
+	err := atdb.FindOne(ctx, adminCollection, bson.M{"username": username}, &admin)
+	if err != nil {
+		return admin, err
+	}
+
+	return admin, nil
+}
+
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
 	mar, err := atdb.GetOneLatestDoc[model.Koordinat](config.Mongoconn, "marker", bson.M{})
@@ -158,40 +176,45 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func AdminLogin(respw http.ResponseWriter, req *http.Request) {
-	var loginReq LoginRequest
 
-	if err := json.NewDecoder(req.Body).Decode(&loginReq); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid JSON data"})
+func Login(respw http.ResponseWriter, req *http.Request) {
+	var loginDetails LoginRequest
+
+	if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
+		http.Error(respw, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	clientOptions := options.Client().ApplyURI(config.MongoURI) // Assuming MongoURI is defined in your config
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	storedAdmin, err := GetAdminByUsername(loginDetails.Username)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to connect to MongoDB", "error": err.Error()})
+		http.Error(respw, "Username not found", http.StatusUnauthorized)
 		return
 	}
-	defer client.Disconnect(context.TODO())
 
+	if loginDetails.Password != storedAdmin.Password {
+		http.Error(respw, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
 
-	adminCollection := client.Database("parkir_db").Collection("admin")
-
-	var admin model.Admin
-	filter := bson.M{"username": loginReq.Username, "password": loginReq.Password}
-	err = adminCollection.FindOne(context.TODO(), filter).Decode(&admin)
+	token, err := config.GenerateJWT(storedAdmin.ID.Hex())
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
-		} else {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to login", "error": err.Error()})
-		}
+		http.Error(respw, "Could not generate token", http.StatusInternalServerError)
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Login successful"})
+	err = SaveTokenToDatabase(config.Mongoconn, "tokens", storedAdmin.ID.Hex(), token)
+	if err != nil {
+		http.Error(respw, "Could not save token", http.StatusInternalServerError)
+		return
+	}
+
+	respw.Header().Set("Content-Type", "application/json")
+	respw.WriteHeader(http.StatusOK)
+	json.NewEncoder(respw).Encode(map[string]string{
+		"status": "Login successful",
+		"token":  token,
+	})
 }
-
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 	var deleteRequest struct {

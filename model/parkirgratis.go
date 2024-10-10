@@ -24,7 +24,7 @@ type Admin struct{
 	Password string             `bson:"password" json:"password"`
 }
 
-type token struct {
+type Token struct {
 	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
 	Token		string				`bson:"token" json:"token,omitempty"`
 	AdminID		string				`bson:"admin_id" json:"admin_id,omitempty"`

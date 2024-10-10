@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"time"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -176,6 +177,42 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+func SaveTokenToDatabase(respw http.ResponseWriter, req *http.Request) error {
+	var reqData struct {
+		AdminID string `json:"admin_id"`
+		Token   string `json:"token"`
+	}
+
+	// Decode JSON dari request body
+	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid JSON format"})
+		return err
+	}
+
+	newToken := model.Token{
+		AdminID:   reqData.AdminID,
+		Token:     reqData.Token,
+		CreatedAt: time.Now(),
+	}
+
+	collection := config.Mongoconn.Collection("tokens")
+	ctx := context.Background()
+
+	filter := bson.M{"admin_id": newToken.AdminID}
+	update := bson.M{
+		"$set": newToken,
+	}
+
+	// Update atau insert token ke dalam database
+	_, err := collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to save token"})
+		return err
+	}
+
+	helper.WriteJSON(respw, http.StatusOK, map[string]string{"status": "Token saved successfully"})
+	return nil
+}
 
 func Login(respw http.ResponseWriter, req *http.Request) {
 	var loginDetails LoginRequest
@@ -202,8 +239,8 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = SaveTokenToDatabase(config.Mongoconn, "tokens", storedAdmin.ID.Hex(), token)
-	if err != nil {
+	// Panggil SaveTokenToDatabase dan tangani error
+	if err := SaveTokenToDatabase(respw, req); err != nil {
 		http.Error(respw, "Could not save token", http.StatusInternalServerError)
 		return
 	}
@@ -214,40 +251,6 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 		"status": "Login successful",
 		"token":  token,
 	})
-}
-
-func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
-	var deleteRequest struct {
-		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-		Markers [][]float64 `json:"markers"`
-	}
-
-	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
-		return
-	}
-
-	filter := bson.M{"_id": id}
-	update := bson.M{
-		"$pull": bson.M{
-			"markers": bson.M{
-				"$in": deleteRequest.Markers,
-			},
-		},
-	}
-
-	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
 
 func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
@@ -316,4 +319,38 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	respw.WriteHeader(http.StatusOK)
 	respw.Write([]byte("Coordinate updated"))
+}
+
+func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
+	var deleteRequest struct {
+		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+		Markers [][]float64 `json:"markers"`
+	}
+
+	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
+		return
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$pull": bson.M{
+			"markers": bson.M{
+				"$in": deleteRequest.Markers,
+			},
+		},
+	}
+
+	if _, err := atdb.UpdateDoc(config.Mongoconn, "marker", filter, update); err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }

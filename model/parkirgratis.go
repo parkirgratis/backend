@@ -21,3 +21,10 @@ type Admin struct{
 	Username string             `bson:"username" json:"username"`
 	Password string             `bson:"password" json:"password"`
 }
+
+type token struct {
+	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
+	Token		string				`bson:"token" json:"token,omitempty"`
+	AdminID		string				`bson:"admin_id" json:"admin_id,omitempty"`
+	CreatedAt	time.Time			`bson:"created_at" json:"created_at"` 
+}

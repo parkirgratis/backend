@@ -177,13 +177,12 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func SaveTokenToDatabase(respw http.ResponseWriter, req *http.Request) error {
+func SaveTokenToMongo(respw http.ResponseWriter, req *http.Request) error {
 	var reqData struct {
 		AdminID string `json:"admin_id"`
 		Token   string `json:"token"`
 	}
 
-	// Decode JSON dari request body
 	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid JSON format"})
 		return err
@@ -214,6 +213,32 @@ func SaveTokenToDatabase(respw http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
+func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
+	var reqData struct {
+		Token string `json:"token"`
+	}
+
+	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid JSON format"})
+		return err
+	}
+
+	collection := config.Mongoconn.Collection("tokens")
+	ctx := context.Background()
+
+	filter := bson.M{"token": reqData.Token}
+
+	// Menghapus token dari database
+	_, err := collection.DeleteOne(ctx, filter)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to delete token"})
+		return err
+	}
+
+	helper.WriteJSON(respw, http.StatusOK, map[string]string{"status": "Token deleted successfully"})
+	return nil
+}
+
 func Login(respw http.ResponseWriter, req *http.Request) {
 	var loginDetails LoginRequest
 
@@ -240,7 +265,7 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Panggil SaveTokenToDatabase dan tangani error
-	if err := SaveTokenToDatabase(respw, req); err != nil {
+	if err := SaveTokenToMongo(respw, req); err != nil {
 		http.Error(respw, "Could not save token", http.StatusInternalServerError)
 		return
 	}

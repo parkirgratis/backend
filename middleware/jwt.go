@@ -29,9 +29,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		tokenString := parts[1]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Check if the signing method is HMAC
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, http.ErrNoLocation // Return an appropriate error
+				return nil, http.ErrNoLocation // Retu
 			}
 			return []byte(config.JWTSecret), nil
 		})
@@ -52,7 +51,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Use the custom context key type
 		ctx := context.WithValue(r.Context(), adminIDKey, adminID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

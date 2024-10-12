@@ -7,6 +7,7 @@ import (
 	"github.com/gocroot/controller"
 	"github.com/gocroot/handler"
 	"github.com/gocroot/helper"
+	"github.com/gocroot/middleware"
 )
 
 func URL(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +42,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.DeleteKoordinat(w, r)
 	case method == "POST" && path == "/admin/login":
 		handler.Login(w, r)
+	case method == "GET" && path == "/admin/admin":
+		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmin)).ServeHTTP(w, r)
 	default:
 		controller.NotFound(w, r)
 	}

@@ -30,3 +30,8 @@ type Token struct {
 	AdminID		string				`bson:"admin_id" json:"admin_id,omitempty"`
 	CreatedAt	time.Time			`bson:"created_at" json:"created_at"` 
 }
+
+type Saran struct {
+	ID			primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Saran_User  string             `bson:"saran_user" json:"saran_user"`
+}

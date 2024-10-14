@@ -267,3 +267,22 @@ func GetSaran(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
+
+func PostSaran(respw http.ResponseWriter, req *http.Request) {
+ 
+    var sara model.saran
+    if err := json.NewDecoder(req.Body).Decode(&sara); err != nil {
+        helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
+        return
+    }
+
+    result, err := config.Mongoconn.Collection("saran").InsertOne(context.Background(), sara)
+    if err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
+        return
+    }
+
+    insertedID := result.InsertedID.(primitive.ObjectID)
+
+    helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Saran berhasil disimpan dengan ID: %s", insertedID.Hex())})
+}

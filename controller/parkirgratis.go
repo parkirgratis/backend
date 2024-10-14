@@ -255,3 +255,15 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
+
+func GetSaran(respw http.ResponseWriter, req *http.Request) {
+	var resp itmodel.Response
+	kor, err := atdb.GetAllDoc[[]model.Tempat](config.Mongoconn, "saran", bson.M{})
+	if err != nil {
+		resp.Response = err.Error()
+		helper.WriteJSON(respw, http.StatusBadRequest, resp)
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, kor)
+}
+

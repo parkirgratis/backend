@@ -26,7 +26,19 @@ type Admin struct{
 
 type Token struct {
 	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
+<<<<<<< HEAD
 	Token		string				`bson:"token,omitemty" json:"token,omitempty"`
 	AdminID		string				`bson:"admin_id,omitempty" json:"admin_id,omitempty"`
 	CreatedAt	time.Time			`bson:"created_at,omitempty" json:"created_at,omitempty"` 
 }
+=======
+	Token		string				`bson:"token" json:"token,omitempty"`
+	AdminID		string				`bson:"admin_id" json:"admin_id,omitempty"`
+	CreatedAt	time.Time			`bson:"created_at" json:"created_at"` 
+}
+
+type Saran struct {
+	ID			primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Saran_User  string             `bson:"saran_user" json:"saran_user"`
+}
+>>>>>>> b50ee7d9551f6c7715be962a41c5cc1927e1c25a

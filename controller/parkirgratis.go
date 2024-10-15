@@ -29,7 +29,6 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
-
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
 	mar, err := atdb.GetOneLatestDoc[model.Koordinat](config.Mongoconn, "marker", bson.M{})

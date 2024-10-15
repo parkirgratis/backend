@@ -29,6 +29,23 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
+func GetTempatByLokasi(respw http.ResponseWriter, req *http.Request) {
+    var resp itmodel.Response
+    lokasi := req.URL.Query().Get("lokasi") 
+
+    filter := bson.M{"lokasi": bson.M{"$regex": lokasi, "$options": "i"}}
+    opts := options.Find().SetLimit(10)
+
+    tempat, err := atdb.GetFilteredDocs[[]model.Tempat](config.Mongoconn, "tempat", filter, opts)
+    if err != nil {
+        resp.Response = err.Error()
+        helper.WriteJSON(respw, http.StatusBadRequest, resp)
+        return
+    }
+
+    helper.WriteJSON(respw, http.StatusOK, tempat)
+}
+
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
 	mar, err := atdb.GetOneLatestDoc[model.Koordinat](config.Mongoconn, "marker", bson.M{})

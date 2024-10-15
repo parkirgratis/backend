@@ -120,7 +120,6 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Panggil SaveTokenToDatabase dan tangani error
 	if err := SaveTokenToMongo(respw, req); err != nil {
 		http.Error(respw, "Could not save token", http.StatusInternalServerError)
 		return

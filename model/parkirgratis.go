@@ -20,13 +20,13 @@ type Koordinat struct {
 }
 type Admin struct{
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Username string             `bson:"username" json:"username"`
-	Password string             `bson:"password" json:"password"`
+	Username string             `bson:"username,omitempty" json:"username,omitempty"`
+	Password string             `bson:"password,omitempty" json:"password,omitempty"`
 }
 
 type Token struct {
 	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
-	Token		string				`bson:"token" json:"token,omitempty"`
-	AdminID		string				`bson:"admin_id" json:"admin_id,omitempty"`
-	CreatedAt	time.Time			`bson:"created_at" json:"created_at"` 
+	Token		string				`bson:"token,omitemty" json:"token,omitempty"`
+	AdminID		string				`bson:"admin_id,omitempty" json:"admin_id,omitempty"`
+	CreatedAt	time.Time			`bson:"created_at,omitempty" json:"created_at,omitempty"` 
 }

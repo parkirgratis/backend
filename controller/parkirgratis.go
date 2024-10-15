@@ -29,11 +29,11 @@ func GetLokasi(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
-func GetTempatByLokasi(respw http.ResponseWriter, req *http.Request) {
+func GetTempatByNamaTempat(respw http.ResponseWriter, req *http.Request) {
     var resp itmodel.Response
-    lokasi := req.URL.Query().Get("lokasi") 
+    lokasi := req.URL.Query().Get("nama_tempat") 
 
-    filter := bson.M{"lokasi": bson.M{"$regex": lokasi, "$options": "i"}}
+    filter := bson.M{"nama_tempat": bson.M{"$regex": lokasi, "$options": "i"}}
     opts := options.Find().SetLimit(10)
 
     tempat, err := atdb.GetFilteredDocs[[]model.Tempat](config.Mongoconn, "tempat", filter, opts)

@@ -83,41 +83,39 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 }
 
 func Login(respw http.ResponseWriter, req *http.Request) {
-	var loginDetails model.Admin
+    var loginDetails model.Admin
 
-	if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
-		http.Error(respw, "Invalid request body", http.StatusBadRequest)
-		return
-	}
+    if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
+        helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+        return
+    }
 
-	storedAdmin, err := GetAdminByUsername(loginDetails.Username)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Username not found"})
-		return
-	}
+    storedAdmin, err := GetAdminByUsername(loginDetails.Username)
+    if err != nil {
+        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Username not found"})
+        return
+    }
 
-	if loginDetails.Password != storedAdmin.Password {
-		http.Error(respw, "Invalid credentials", http.StatusUnauthorized)
-		return
-	}
+    if loginDetails.Password != storedAdmin.Password {
+        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+        return
+    }
 
-	token, err := config.GenerateJWT(storedAdmin.ID.Hex())
-	if err != nil {
-		http.Error(respw, "Could not generate token", http.StatusInternalServerError)
-		return
-	}
+    token, err := config.GenerateJWT(storedAdmin.ID.Hex())
+    if err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})
+        return
+    }
 
-	if err := SaveTokenToMongoWithParams(respw, req); err != nil {
-		http.Error(respw, "Could not save token", http.StatusInternalServerError)
-		return
-	}
+    if err := SaveTokenToMongoWithParams(storedAdmin.ID.Hex(), token); err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not save token"})
+        return
+    }
 
-	respw.Header().Set("Content-Type", "application/json")
-	respw.WriteHeader(http.StatusOK)
-	json.NewEncoder(respw).Encode(map[string]string{
-		"status": "Login successful",
-		"token":  token,
-	})
+    helper.WriteJSON(respw, http.StatusOK, map[string]string{
+        "status": "Login successful",
+        "token":  token,
+    })
 }
 
 func DashboardAdmin(respw http.ResponseWriter, req *http.Request) {

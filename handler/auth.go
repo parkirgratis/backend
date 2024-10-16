@@ -33,40 +33,27 @@ func GetAdminByUsername(username string) (model.Admin, error) {
 	return admin, nil
 }
 
-func SaveTokenToMongo(respw http.ResponseWriter, req *http.Request) error {
-	var reqData struct {
-		AdminID string `json:"admin_id"`
-		Token   string `json:"token"`
-	}
+func SaveTokenToMongoWithParams(adminID, token string) error {
+    newToken := model.Token{
+        AdminID:   adminID,
+        Token:     token,
+        CreatedAt: time.Now(),
+    }
 
-	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid JSON format"})
-		return err
-	}
+    collection := config.Mongoconn.Collection("tokens")
+    ctx := context.Background()
 
-	newToken := model.Token{
-		AdminID:   reqData.AdminID,
-		Token:     reqData.Token,
-		CreatedAt: time.Now(),
-	}
+    filter := bson.M{"admin_id": newToken.AdminID}
+    update := bson.M{
+        "$set": newToken,
+    }
 
-	collection := config.Mongoconn.Collection("tokens")
-	ctx := context.Background()
+    _, err := collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+    if err != nil {
+        return fmt.Errorf("failed to save token: %w", err)
+    }
 
-	filter := bson.M{"admin_id": newToken.AdminID}
-	update := bson.M{
-		"$set": newToken,
-	}
-
-	// Update atau insert token ke dalam database
-	_, err := collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to save token"})
-		return err
-	}
-
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"status": "Token saved successfully"})
-	return nil
+    return nil
 }
 
 func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
@@ -105,7 +92,7 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 
 	storedAdmin, err := GetAdminByUsername(loginDetails.Username)
 	if err != nil {
-		http.Error(respw, "Username not found", http.StatusUnauthorized)
+		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Username not found"})
 		return
 	}
 
@@ -120,7 +107,7 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := SaveTokenToMongo(respw, req); err != nil {
+	if err := SaveTokenToMongoWithParams(respw, req); err != nil {
 		http.Error(respw, "Could not save token", http.StatusInternalServerError)
 		return
 	}

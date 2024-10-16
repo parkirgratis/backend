@@ -47,11 +47,9 @@ func GetTempatByNamaTempat(respw http.ResponseWriter, req *http.Request) {
 }
 
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
-	var resp itmodel.Response
 	mar, err := atdb.GetOneLatestDoc[model.Koordinat](config.Mongoconn, "marker", bson.M{})
 	if err != nil {
-		resp.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusBadRequest, mar)
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 	helper.WriteJSON(respw, http.StatusOK, mar)

@@ -272,7 +272,7 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 
 func GetSaran(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
-	kor, err := atdb.GetAllDoc[[]model.Tempat](config.Mongoconn, "saran", bson.M{})
+	kor, err := atdb.GetAllDoc[[]model.Saran](config.Mongoconn, "saran", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteJSON(respw, http.StatusBadRequest, resp)
@@ -332,3 +332,35 @@ func DeleteSaran(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Document deleted successfully"})
 }
 
+func PutSaran(respw http.ResponseWriter, req *http.Request) {
+	var newSaran model.Saran
+	if err := json.NewDecoder(req.Body).Decode(&newSaran); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Println("Decoded document:", newSaran)
+
+	if newSaran.ID.IsZero() {
+		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
+		return
+	}
+
+	filter := bson.M{"_id": newSaran.ID}
+	update := bson.M{"$set": newSaran}
+	fmt.Println("Filter:", filter)
+	fmt.Println("Update:", update)
+
+	result, err := atdb.UpdateDoc(config.Mongoconn, "saran", filter, update)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if result.ModifiedCount == 0 {
+		helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
+		return
+	}
+
+	helper.WriteJSON(respw, http.StatusOK, newTempat)
+}

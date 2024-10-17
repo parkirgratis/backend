@@ -362,5 +362,5 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, newTempat)
+	helper.WriteJSON(respw, http.StatusOK, newSaran)
 }

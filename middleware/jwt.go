@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"errors"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gocroot/config"
@@ -11,7 +12,7 @@ import (
 
 type contextKey string
 
-const adminIDKey contextKey = "admin_id"
+const AdminIDContextKey contextKey = "admin_id"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +31,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		tokenString := parts[1]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, http.ErrNoLocation // Retu
+				return nil, errors.New("unexpected signing method")
 			}
 			return []byte(config.JWTSecret), nil
 		})
+
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
@@ -47,11 +49,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		adminID, ok := claims["admin_id"].(string)
 		if !ok {
-			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			http.Error(w, "Invalid token claims: admin_id missing", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), adminIDKey, adminID)
+		ctx := context.WithValue(r.Context(), AdminIDContextKey, adminID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

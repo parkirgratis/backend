@@ -124,14 +124,22 @@
 			http.Error(respw, "Admin ID not found in context", http.StatusInternalServerError)
 			return
 		}
-
-		adminIDStr := fmt.Sprintf("%v", adminID)
-
+	
+		adminIDStr, ok := adminID.(string)
+		if !ok {
+			http.Error(respw, "Invalid Admin ID", http.StatusInternalServerError)
+			return
+		}
+	
 		respw.Header().Set("Content-Type", "application/json")
 		resp := map[string]interface{}{
 			"status":   http.StatusOK,
 			"message":  "Dashboard access successful",
 			"admin_id": adminIDStr,
 		}
-		json.NewEncoder(respw).Encode(resp)
+	
+		if err := json.NewEncoder(respw).Encode(resp); err != nil {
+			http.Error(respw, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 	}

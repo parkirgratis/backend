@@ -119,7 +119,7 @@
 	}
 
 	func DashboardAdmin(respw http.ResponseWriter, req *http.Request) {
-		adminID := req.Context().Value("adm	in_id")
+		adminID := req.Context().Value("admin_id")
 		if adminID == nil {
 			http.Error(respw, "Admin ID not found in context", http.StatusInternalServerError)
 			return

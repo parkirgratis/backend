@@ -5,6 +5,7 @@
 		"encoding/json"
 		"fmt"
 		"time"
+		"log"
 		"net/http"
 		"github.com/gocroot/config"
 		"github.com/gocroot/helper"
@@ -119,12 +120,14 @@
 	func DashboardAdmin(res http.ResponseWriter, req *http.Request) {
 		adminID := req.Context().Value("admin_id")
 		if adminID == nil {
+			log.Println("Admin ID not found in context")
 			http.Error(res, "Admin ID not found in context", http.StatusInternalServerError)
 			return
 		}
 	
 		adminIDStr, ok := adminID.(string)
 		if !ok {
+			log.Println("Invalid Admin ID type")
 			http.Error(res, "Invalid Admin ID", http.StatusInternalServerError)
 			return
 		}

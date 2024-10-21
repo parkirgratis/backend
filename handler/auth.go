@@ -4,10 +4,8 @@
 		"context"
 		"encoding/json"
 		"fmt"
-
 		"time"
 		"net/http"
-
 		"github.com/gocroot/config"
 		"github.com/gocroot/helper"
 		"github.com/gocroot/helper/atdb"
@@ -118,28 +116,25 @@
 		})
 	}
 
-	func DashboardAdmin(respw http.ResponseWriter, req *http.Request) {
+	func DashboardAdmin(res http.ResponseWriter, req *http.Request) {
 		adminID := req.Context().Value("admin_id")
 		if adminID == nil {
-			http.Error(respw, "Admin ID not found in context", http.StatusInternalServerError)
+			http.Error(res, "Admin ID not found in context", http.StatusInternalServerError)
 			return
 		}
 	
 		adminIDStr, ok := adminID.(string)
 		if !ok {
-			http.Error(respw, "Invalid Admin ID", http.StatusInternalServerError)
+			http.Error(res, "Invalid Admin ID", http.StatusInternalServerError)
 			return
 		}
 	
-		respw.Header().Set("Content-Type", "application/json")
 		resp := map[string]interface{}{
 			"status":   http.StatusOK,
 			"message":  "Dashboard access successful",
 			"admin_id": adminIDStr,
 		}
 	
-		if err := json.NewEncoder(respw).Encode(resp); err != nil {
-			http.Error(respw, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
+		res.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(res).Encode(resp)
 	}

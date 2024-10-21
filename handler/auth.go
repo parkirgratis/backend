@@ -118,26 +118,31 @@
 	}
 
 	func DashboardAdmin(res http.ResponseWriter, req *http.Request) {
+		res.Header().Set("Content-Type", "application/json")
+	
 		adminID := req.Context().Value("admin_id")
 		if adminID == nil {
-			log.Println("Admin ID not found in context")
-			http.Error(res, "Admin ID not found in context", http.StatusInternalServerError)
+			log.Println("Admin ID tidak ditemukan di konteks")
+			json.NewEncoder(res).Encode(map[string]string{
+				"error": "Admin ID tidak ditemukan di konteks",
+			})
 			return
 		}
 	
 		adminIDStr, ok := adminID.(string)
 		if !ok {
-			log.Println("Invalid Admin ID type")
-			http.Error(res, "Invalid Admin ID", http.StatusInternalServerError)
+			log.Println("Tipe Admin ID tidak valid")
+			json.NewEncoder(res).Encode(map[string]string{
+				"error": "Admin ID tidak valid",
+			})
 			return
 		}
 	
 		resp := map[string]interface{}{
 			"status":   http.StatusOK,
-			"message":  "Dashboard access successful",
+			"message":  "Akses dashboard berhasil",
 			"admin_id": adminIDStr,
 		}
 	
-		res.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(res).Encode(resp)
 	}

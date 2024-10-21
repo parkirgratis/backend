@@ -107,6 +107,21 @@ func GetOneLatestDoc[T any](db *mongo.Database, collection string, filter bson.M
 	return
 }
 
+func GetFilteredDocs[T any](db *mongo.Database, collection string, filter bson.M, opts *options.FindOptions) (result T, err error) {
+    ctx := context.Background()
+    cur, err := db.Collection(collection).Find(ctx, filter, opts)
+    if err != nil {
+        return
+    }
+    defer cur.Close(ctx)
+
+    err = cur.All(ctx, &result)
+    if err != nil {
+        return
+    }
+    return
+}
+
 func InsertOneDoc(db *mongo.Database, collection string, doc interface{}) (insertedID interface{}, err error) {
 	insertResult, err := db.Collection(collection).InsertOne(context.TODO(), doc)
 	if err != nil {

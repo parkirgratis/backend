@@ -5,7 +5,9 @@ import (
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/controller"
+	"github.com/gocroot/handler"
 	"github.com/gocroot/helper"
+	"github.com/gocroot/middleware"
 )
 
 func URL(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +24,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetLokasi(w, r)
 	case method == "GET" && path == "/data/marker":
 		controller.GetMarker(w, r)
+	case method == "GET" && path == "/data/nama-tempat":
+		controller.GetTempatByNamaTempat(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
 		controller.PostInboxNomor(w, r)
 	case method == "POST" && path == "/tempat-parkir":
@@ -39,7 +43,15 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/koordinat":
 		controller.DeleteKoordinat(w, r)
 	case method == "POST" && path == "/admin/login":
-		controller.AdminLogin(w, r)
+		handler.Login(w, r)
+	case method == "GET" && path == "/data/saran":
+		controller.GetSaran(w, r)
+	case method == "POST" && path == "/data/saran":
+		controller.PostSaran(w, r)
+	case method == "DELETE" && path == "/data/saran":
+		controller.DeleteSaran(w, r)
+	case method == "GET" && path == "/admin/admin":
+		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmin)).ServeHTTP(w, r)
 	default:
 		controller.NotFound(w, r)
 	}

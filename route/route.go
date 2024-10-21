@@ -50,7 +50,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostSaran(w, r)
 	case method == "DELETE" && path == "/data/saran":
 		controller.DeleteSaran(w, r)
-	case method == "GET" && path == "/admin/admin":
+	case method == "GET" && path == "/admin/dashboard":
 		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmin)).ServeHTTP(w, r)
 	default:
 		controller.NotFound(w, r)

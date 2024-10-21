@@ -36,14 +36,31 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
 			return []byte(config.JWTSecret), nil
 		})
 
 		if err != nil {
-			fmt.Println("Token parsing error:", err)
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			var ve *jwt.ValidationError
+			if errors.As(err, &ve) {
+				if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+					fmt.Println("Token is malformed")
+					http.Error(w, "Malformed token", http.StatusUnauthorized)
+				} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
+					fmt.Println("Token is expired")
+					http.Error(w, "Token expired", http.StatusUnauthorized)
+				} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
+					fmt.Println("Token not valid yet")
+					http.Error(w, "Token not valid yet", http.StatusUnauthorized)
+				} else {
+					fmt.Println("Invalid token:", err)
+					http.Error(w, "Invalid token", http.StatusUnauthorized)
+				}
+			} else {
+				fmt.Println("Error parsing token:", err)
+				http.Error(w, "Invalid token", http.StatusUnauthorized)
+			}
 			return
 		}
 
@@ -66,11 +83,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Invalid token claims: admin_id missing", http.StatusUnauthorized)
 			return
 		}
-
-		// Log admin ID
 		fmt.Println("admin_id from token:", adminID)
 
 		ctx := context.WithValue(r.Context(), AdminIDContextKey, adminID)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

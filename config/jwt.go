@@ -3,9 +3,10 @@ package config
 import (
     "time"
     "github.com/golang-jwt/jwt/v4"
+    "os"
 )
 
-var JWTSecret = "ZeNvErSERynHrSZ"
+var JWTSecret = os.Getenv("JWT_SECRET")
 
 func GenerateJWT(adminID string) (string, error) {
     claims := jwt.MapClaims{

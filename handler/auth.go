@@ -1,19 +1,21 @@
-	package handler
+package handler
 
-	import(
-		"context"
-		"encoding/json"
-		"fmt"
-		"time"
-		"log"
-		"net/http"
-		"github.com/gocroot/config"
-		"github.com/gocroot/helper"
-		"github.com/gocroot/helper/atdb"
-		"github.com/gocroot/model"
-		"go.mongodb.org/mongo-driver/bson"
-		"go.mongodb.org/mongo-driver/mongo/options"
-	)
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gocroot/config"
+	"github.com/gocroot/helper"
+	"github.com/gocroot/helper/atdb"
+	"github.com/gocroot/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 	func GetAdminByUsername(username string) (model.Admin, error) {
 		var admin model.Admin
 
@@ -115,6 +117,36 @@
 			"status": "Login successful",
 			"token":  token,
 		})
+	}
+
+	func Logout(respw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Authorization header missing"})
+			return
+		}
+	
+		
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		if token == "" {
+			helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid token format"})
+			return
+		}
+	
+		
+		collection := config.Mongoconn.Collection("tokens")
+		ctx := context.Background()
+	
+				filter := bson.M{"token": token}
+	
+		
+		_, err := collection.DeleteOne(ctx, filter)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete token"})
+			return
+		}
+	
+		helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Logout successful"})
 	}
 
 	func DashboardAdmin(res http.ResponseWriter, req *http.Request) {

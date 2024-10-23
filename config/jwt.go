@@ -20,14 +20,11 @@ func GenerateJWT(adminID string) (string, error) {
 }
 
 func HashPassword(password string) (string, error) {
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    if err != nil {
-        return "", err
-    }
-    return string(hashedPassword), nil
+    bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    return string(bytes), err
 }
 
-func CheckPasswordHash(password, hashedPassword string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+func CheckPasswordHash(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     return err == nil
 }

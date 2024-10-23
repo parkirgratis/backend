@@ -97,11 +97,11 @@ import (
 			return
 		}
 
-		if loginDetails.Password != storedAdmin.Password {
+		if !config.CheckPasswordHash(loginDetails.Password, storedAdmin.Password) {
 			helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 			return
 		}
-
+		
 		token, err := config.GenerateJWT(storedAdmin.ID.Hex())
 		if err != nil {
 			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})

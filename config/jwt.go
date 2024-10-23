@@ -4,6 +4,7 @@ import (
     "time"
     "github.com/golang-jwt/jwt/v4"
     "os"
+    "golang.org/x/crypto/bcrypt"
 )
 
 var JWTSecret = os.Getenv("JWT_SECRET")
@@ -16,4 +17,12 @@ func GenerateJWT(adminID string) (string, error) {
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString([]byte(JWTSecret))
+}
+
+func HashPassword(password string) (string, error) {
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return "", err
+    }
+    return string(hashedPassword), nil
 }

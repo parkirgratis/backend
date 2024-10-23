@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
 	"github.com/gocroot/config"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
@@ -113,6 +113,13 @@ import (
 			return
 		}
 
+		if err = SaveActivity(storedAdmin.ID, "login"); err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to record login activity"})
+			return
+		}else{
+			helper.WriteJSON(respw, http.StatusAlreadyReported, map[string]string{"message": "Login activity recorded successfully"} )
+		}
+		
 		helper.WriteJSON(respw, http.StatusOK, map[string]string{
 			"status": "Login successful",
 			"token":  token,
@@ -205,6 +212,25 @@ import (
 		_, err := adminCollection.InsertOne(ctx, admin)
 		if err != nil {
 			return fmt.Errorf("failed to insert new admin: %w", err)
+		}
+	
+		return nil
+	}
+
+	func SaveActivity(adminID primitive.ObjectID, action string) error {
+		activity := model.Activity{
+			AdminID:   adminID,
+			Action:    action,
+			Timestamp: time.Now(),
+		}
+	
+		collection := config.Mongoconn.Collection("activities")
+		ctx := context.Background()
+	
+		_, err := collection.InsertOne(ctx, activity)
+		if err != nil {
+			log.Println("Failed to save activity:", err)
+			return fmt.Errorf("failed to save activity: %w", err)
 		}
 	
 		return nil

@@ -169,3 +169,29 @@ import (
 	
 		json.NewEncoder(res).Encode(resp)
 	}
+
+	func RegisterAdmin(respw http.ResponseWriter, req *http.Request) {
+		var newAdmin model.Admin
+	
+		if err := json.NewDecoder(req.Body).Decode(&newAdmin); err != nil {
+			helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+			return
+		}
+	
+		hashedPassword, err := config.HashPassword(newAdmin.Password)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to hash password"})
+			return
+		}
+	
+		newAdmin.Password = hashedPassword
+	
+		// Save the new admin to the database (assuming you have a SaveAdmin function)
+		if err := SaveAdminToMongo(newAdmin); err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to register admin"})
+			return
+		}
+	
+		helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Admin registered successfully"})
+	}
+	

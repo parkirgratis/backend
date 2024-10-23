@@ -131,13 +131,6 @@ import (
 			return
 		}
 
-		if err = SaveActivity(storedAdmin.ID, "login"); err != nil {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to record login activity"})
-			return
-		}else{
-			helper.WriteJSON(respw, http.StatusAlreadyReported, map[string]string{"message": "Login activity recorded successfully"} )
-		}
-		
 		helper.WriteJSON(respw, http.StatusOK, map[string]string{
 			"status": "Login successful",
 			"token":  token,

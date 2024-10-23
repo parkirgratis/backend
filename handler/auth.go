@@ -186,7 +186,6 @@ import (
 	
 		newAdmin.Password = hashedPassword
 	
-		// Save the new admin to the database (assuming you have a SaveAdmin function)
 		if err := SaveAdminToMongo(newAdmin); err != nil {
 			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to register admin"})
 			return
@@ -195,3 +194,18 @@ import (
 		helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Admin registered successfully"})
 	}
 	
+	func SaveAdminToMongo(admin model.Admin) error {
+		if config.ErrorMongoconn != nil {
+			return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+		}
+	
+		adminCollection := config.Mongoconn.Collection("admin")
+		ctx := context.Background()
+	
+		_, err := adminCollection.InsertOne(ctx, admin)
+		if err != nil {
+			return fmt.Errorf("failed to insert new admin: %w", err)
+		}
+	
+		return nil
+	}

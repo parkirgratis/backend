@@ -35,3 +35,10 @@ type Saran struct {
 	ID			primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Saran_User  string             `bson:"saran_user" json:"saran_user"`
 }
+
+type Activity struct {
+	ID 		  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	AdminID   primitive.ObjectID `bson:"admin_id,omitempty" json:"admin_id,omitempty"`
+    Action    string             `bson:"action,omitempty" json:"action,omitempty"`
+    Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
+}

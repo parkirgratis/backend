@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
+	"log"
+	"time"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -92,7 +93,6 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Create filter and update fields
 	filter := bson.M{"_id": id}
 	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
 
@@ -364,3 +364,29 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, newSaran)
 }
+
+func SaveActivity(respw http.ResponseWriter, req *http.Request, adminID primitive.ObjectID, action string) {
+    // Nyieun Object Activity hela
+    activity := model.Activity{
+        AdminID:   adminID,
+        Action:    action,
+        Timestamp: time.Now(),
+    }
+
+    // Nyokot activity collection mongo
+    collection := config.Mongoconn.Collection("activities")
+    ctx := context.Background()
+
+    // Validasi lamun berhasil nyimpen activity ka mongo lamun salah gagal nyimpen
+    _, err := collection.InsertOne(ctx, activity)
+    if err != nil {
+        log.Println("Failed to save activity:", err)
+        // Ngirim respon lamun salah validasi atau gagal nyimpen activty
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to save activity"})
+        return
+    }
+
+    // Lamun bener validasi na nyimpen activity
+    helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Activity saved successfully"})
+}
+

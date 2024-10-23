@@ -26,7 +26,7 @@ type Admin struct{
 
 type Token struct {
 	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
-	Token string 					`bson:"token,omitempty" json:"token,omitempty"`
+	Token 		string 					`bson:"token,omitempty" json:"token,omitempty"`
 	AdminID		string				`bson:"admin_id,omitempty" json:"admin_id,omitempty"`
 	CreatedAt	time.Time			`bson:"created_at,omitempty" json:"created_at,omitempty"` 
 }

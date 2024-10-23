@@ -34,6 +34,24 @@ import (
 		return admin, nil
 	}
 
+	func GetAdminIDFromToken(adminID string) (model.Token, error) {
+		var admin model.Token
+
+		if config.ErrorMongoconn != nil {
+			return admin, fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+		}
+
+		adminCollection := config.Mongoconn.Collection("tokens")
+		ctx := context.Background()
+
+		err := atdb.FindOne(ctx, adminCollection, bson.M{"admin_id": adminID}, &admin)
+		if err != nil {
+			return admin, err
+		}
+
+		return admin, nil
+	}
+
 	func SaveTokenToMongoWithParams(adminID, token string) error {
 		newToken := model.Token{
 			AdminID:   adminID,

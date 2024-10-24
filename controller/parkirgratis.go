@@ -279,30 +279,38 @@ func GetSaran(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
-func LogActivity(respw http.ResponseWriter, req *http.Request ) error {
-	var logactivity struct{
-	AdminID   primitive.ObjectID `bson:"admin_id,omitempty" json:"admin_id,omitempty"`
-    Action    string             `bson:"action,omitempty" json:"action,omitempty"`
-    Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
-	}
-	
-	if err := json.NewDecoder(req.Body).Decode(&logactivity); err !=  nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
-		return err
-	}
+func LogActivity(respw http.ResponseWriter, req *http.Request) error {
 
-	result, err := config.Mongoconn.Collection("activity_logs").InsertOne(context.Background(), logactivity)
+    adminID := req.Header.Get("admin_id")
+    if adminID == "" {
+        http.Error(respw, "Admin ID not found", http.StatusUnauthorized)
+        return fmt.Errorf("admin ID missing")
+    }
 
-	if err != nil{
-		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
-		return err
-	}
-	
-	insertedID := result.InsertedID.(primitive.ObjectID)
+    userID, err := primitive.ObjectIDFromHex(adminID)
+    if err != nil {
+        http.Error(respw, "Invalid Admin ID", http.StatusBadRequest)
+        return fmt.Errorf("invalid admin ID: %v", err)
+    }
 
-	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Log Activity Tersimpan dengan ID: %s", insertedID.Hex())})
+    logactivity := struct {
+        UserID    primitive.ObjectID `bson:"admin_id,omitempty" json:"admin_id,omitempty"`
+        Action    string             `bson:"action,omitempty" json:"action,omitempty"`
+        Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
+    }{
+        UserID:    userID,           
+        Action:    "Your Action",    
+        Timestamp: time.Now(),
+    }
 
-	return nil
+    collection := config.Mongoconn.Collection("activity_logs")
+    _, err = collection.InsertOne(context.Background(), logactivity)
+    if err != nil {
+        http.Error(respw, "Failed to log activity", http.StatusInternalServerError)
+        return err
+    }
+
+    return nil
 }
 
 func PostSaran(respw http.ResponseWriter, req *http.Request) {

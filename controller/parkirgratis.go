@@ -137,6 +137,11 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	err = LogActivity(respw, req)
+    if err != nil {
+        fmt.Println("Failed to log activity:", err)
+    }
+
 	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }
 

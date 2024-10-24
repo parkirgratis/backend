@@ -74,6 +74,12 @@ func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 
     insertedID := result.InsertedID.(primitive.ObjectID)
 
+	err = LogActivity(respw, req)
+    if err != nil {
+        fmt.Println("Failed to log activity:", err)
+    }
+
+
     helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Tempat parkir berhasil disimpan dengan ID: %s", insertedID.Hex())})
 }
 

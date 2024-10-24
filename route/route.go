@@ -48,6 +48,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		handler.Logout(w, r)
 	case method == "POST" && path == "/admin/register":
 		handler.RegisterAdmin(w, r)
+	case method == "POST" && path == "/admin/activity":
+		controller.LogActivity(w, r)
 	case method == "GET" && path == "/data/saran":
 		controller.GetSaran(w, r)
 	case method == "POST" && path == "/data/saran":

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 	"github.com/gocroot/config"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
@@ -223,25 +222,6 @@ import (
 		_, err := adminCollection.InsertOne(ctx, admin)
 		if err != nil {
 			return fmt.Errorf("failed to insert new admin: %w", err)
-		}
-	
-		return nil
-	}
-
-	func SaveActivity(adminID primitive.ObjectID, action string) error {
-		activity := model.Activity{
-			AdminID:   adminID,
-			Action:    action,
-			Timestamp: time.Now(),
-		}
-	
-		collection := config.Mongoconn.Collection("activities")
-		ctx := context.Background()
-	
-		_, err := collection.InsertOne(ctx, activity)
-		if err != nil {
-			log.Println("Failed to save activity:", err)
-			return fmt.Errorf("failed to save activity: %w", err)
 		}
 	
 		return nil

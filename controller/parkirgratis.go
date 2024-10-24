@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
+	"time"
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
@@ -279,6 +279,31 @@ func GetSaran(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, kor)
 }
 
+func LogActivity(respw http.ResponseWriter, req *http.Request ) error {
+	var logactivity struct{
+	AdminID   primitive.ObjectID `bson:"admin_id,omitempty" json:"admin_id,omitempty"`
+    Action    string             `bson:"action,omitempty" json:"action,omitempty"`
+    Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
+	}
+	
+	if err := json.NewDecoder(req.Body).Decode(&logactivity); err !=  nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
+		return err
+	}
+
+	result, err := config.Mongoconn.Collection("activity_logs").InsertOne(context.Background(), logactivity)
+
+	if err != nil{
+		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
+		return err
+	}
+	
+	insertedID := result.InsertedID.(primitive.ObjectID)
+
+	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Log Activity Tersimpan dengan ID: %s", insertedID.Hex())})
+
+	return nil
+}
 
 func PostSaran(respw http.ResponseWriter, req *http.Request) {
     var sarans model.Saran
@@ -362,4 +387,3 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, newSaran)
 }
-

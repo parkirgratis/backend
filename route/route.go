@@ -24,7 +24,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetLokasi(w, r)
 	case method == "GET" && path == "/data/marker":
 		controller.GetMarker(w, r)
-	case method == "GET" && path == "/data/nama-tempat":
+	case method == "GET" && path == "/data/search-namatempat":
 		controller.GetTempatByNamaTempat(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
 		controller.PostInboxNomor(w, r)

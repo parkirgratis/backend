@@ -118,3 +118,37 @@ func PutUpdateGithub(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("File update process completed successfully")
 }
 
+func DeleteFileGithub(w http.ResponseWriter, r *http.Request) {
+	var respn itmodel.Response
+
+	fmt.Println("Starting file delete process")
+
+	folder := helper.GetParam(r)
+	if folder == "" {
+		respn.Response = "File path is required"
+		helper.WriteJSON(w, http.StatusBadRequest, respn)
+		return
+	}
+
+	gh, err := atdb.GetOneDoc[model.Ghcreates](config.Mongoconn, "github", bson.M{})
+	if err != nil {
+		fmt.Println("Error fetching GitHub credentials:", err)
+		respn.Info = helper.GetSecretFromHeader(r)
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusConflict, respn)
+		return
+	}
+
+	err = ghupload.GithubDelete(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, "parkirgratis", "filegambar", folder)
+	if err != nil {
+		fmt.Println("Error deleting file from GitHub:", err)
+		respn.Info = "gagal menghapus file di github"
+		respn.Response = err.Error()
+		helper.WriteJSON(w, http.StatusInternalServerError, respn)
+		return
+	}
+
+	respn.Response = "File successfully deleted"
+	helper.WriteJSON(w, http.StatusOK, respn)
+	fmt.Println("File delete process completed successfully")
+}

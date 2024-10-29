@@ -8,7 +8,7 @@ import (
 var AllowedOrigins = []string{
 	"https://parkirgratis.github.io",
 	"https://parkirgratis.github.io.id",
-	"https://parkirgratis.if.co.id/input/",
+	"https://parkirgratis.if.co.id/input",
 	"https://parkirgratis.if.co.id",
 	"http://127.0.0.1:5500",
 	"http://127.0.0.1:5501",

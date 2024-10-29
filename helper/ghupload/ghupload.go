@@ -53,3 +53,32 @@ func GithubUpload(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail string,
 
 	return
 }
+
+func GithubDelete(GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail, githubOrg, githubRepo, pathFile string) error {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: GitHubAccessToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+
+	currentContent, _, _, err := client.Repositories.GetContents(ctx, githubOrg, githubRepo, pathFile, nil)
+	if err != nil {
+		return err
+	}
+
+	opts := &github.RepositoryContentFileOptions{
+		Message: github.String("Delete file"),
+		SHA:     currentContent.SHA,
+		Branch:  github.String("main"),
+		Author: &github.CommitAuthor{
+			Name:  github.String(GitHubAuthorName),
+			Email: github.String(GitHubAuthorEmail),
+		},
+	}
+
+	
+	_, _, err = client.Repositories.DeleteFile(ctx, githubOrg, githubRepo, pathFile, opts)
+	return err
+}

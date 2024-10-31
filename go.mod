@@ -1,9 +1,11 @@
 module github.com/gocroot
 
-go 1.22.3
+go 1.22.5
+
+toolchain go1.22.8
 
 require (
-	aidanwoods.dev/go-paseto v1.5.1
+	aidanwoods.dev/go-paseto v1.5.2
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/go-github/v59 v59.0.0

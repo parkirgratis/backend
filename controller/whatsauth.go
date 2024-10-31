@@ -84,3 +84,4 @@ func NotFound(respw http.ResponseWriter, req *http.Request) {
 	resp.Response = "Not Found"
 	helper.WriteJSON(respw, http.StatusNotFound, resp)
 }
+

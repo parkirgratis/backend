@@ -15,23 +15,34 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-	func GetAdminByUsername(username string) (model.Admin, error) {
-		var admin model.Admin
+func GetAdminByUsername(respw http.ResponseWriter, req *http.Request) error {
+	var admin model.Admin
+	username := req.URL.Query().Get("username")
 
-		if config.ErrorMongoconn != nil {
-			return admin, fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
-		}
-
-		adminCollection := config.Mongoconn.Collection("admin")
-		ctx := context.Background()
-
-		err := atdb.FindOne(ctx, adminCollection, bson.M{"username": username}, &admin)
-		if err != nil {
-			return admin, err
-		}
-
-		return admin, nil
+	//Validasi jika gagal connect ke databe
+	if config.ErrorMongoconn != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
+		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
 	}
+
+	
+	adminCollection := config.Mongoconn.Collection("admin")
+	ctx := context.Background()
+
+	//Validasi jika username tidak temukan
+	err := atdb.FindOne(ctx, adminCollection, bson.M{"username": username}, &admin)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"error": "User not found"})
+		return err
+	}
+
+	// Kirim data admin dalam response status ok berhasil
+	helper.WriteJSON(respw, http.StatusOK, map[string]interface{}{
+		"status":  "Admin found",
+		"admin":   admin,
+	})
+	return nil
+}
 
 	func GetAdminIDFromToken(adminID string) (model.Token, error) {
 		var admin model.Token
@@ -108,9 +119,7 @@ import (
 			return
 		}
 
-		storedAdmin, err := GetAdminByUsername(loginDetails.Username)
-		if err != nil {
-			helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Username not found"})
+		if err := GetAdminByUsername(respw, req); err != nil {
 			return
 		}
 

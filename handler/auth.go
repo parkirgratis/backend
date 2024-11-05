@@ -15,6 +15,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+//fungsi untuk mendapatkan admin berdasarkan username
 func GetAdminByUsername(respw http.ResponseWriter, req *http.Request) error {
 	var admin model.Admin
 	username := req.URL.Query().Get("username")
@@ -44,23 +46,38 @@ func GetAdminByUsername(respw http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-	func GetAdminIDFromToken(adminID string) (model.Token, error) {
-		var admin model.Token
+func GetAdminIDFromToken(respw http.ResponseWriter, req *http.Request) error {
+	var admin model.Token
 
-		if config.ErrorMongoconn != nil {
-			return admin, fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
-		}
-
-		adminCollection := config.Mongoconn.Collection("tokens")
-		ctx := context.Background()
-
-		err := atdb.FindOne(ctx, adminCollection, bson.M{"admin_id": adminID}, &admin)
-		if err != nil {
-			return admin, err
-		}
-
-		return admin, nil
+	// Mendapatkan `admin_id` dari URL
+	adminID := req.URL.Query().Get("admin_id")
+	if adminID == "" {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Admin ID is missing"})
+		return fmt.Errorf("admin ID is missing")
 	}
+
+	if config.ErrorMongoconn != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
+		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+	}
+
+	adminCollection := config.Mongoconn.Collection("tokens")
+	ctx := context.Background()
+
+	// Mencari admin berdasarkan `admin_id`
+	err := atdb.FindOne(ctx, adminCollection, bson.M{"admin_id": adminID}, &admin)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"error": "Admin ID not found"})
+		return fmt.Errorf("admin ID not found: %w", err)
+	}
+
+	// Jika ditemukan, kirim respons berhasil
+	helper.WriteJSON(respw, http.StatusOK, map[string]interface{}{
+		"status": "Admin ID found",
+		"admin":  admin,
+	})
+	return nil
+}
 
 	func SaveTokenToMongoWithParams(adminID, token string) error {
 		newToken := model.Token{

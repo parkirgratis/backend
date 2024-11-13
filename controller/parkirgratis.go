@@ -412,3 +412,57 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, newSaran)
 }
+
+func ValidateAndFetchData(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "Unauthorized: Token is missing", http.StatusUnauthorized)
+		return
+	}
+
+	noWa, err := decodePasetoToken(token)
+	if err != nil {
+		http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		http.Error(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer client.Disconnect(context.TODO())
+	usersCollection := client.Database("your_database_name").Collection("users")
+
+	var user bson.M
+	err = usersCollection.FindOne(context.TODO(), bson.M{"no_wa": noWa}).Decode(&user)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	}
+
+	resp, err := http.Get("https://asia-southeast2-awangga.cloudfunctions.net/petabackend/data/gis/lokasi")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		http.Error(w, "Failed to fetch data from dosen endpoint", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var dosenData map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&dosenData); err != nil {
+		http.Error(w, "Failed to decode response from dosen", http.StatusInternalServerError)
+		return
+	}
+
+	parkirCollection := client.Database("your_database_name").Collection("parkir")
+
+	_, err = parkirCollection.InsertOne(context.TODO(), dosenData)
+	if err != nil {
+		http.Error(w, "Failed to save data", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Data successfully saved to your database")
+}

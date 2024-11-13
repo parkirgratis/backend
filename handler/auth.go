@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
@@ -247,4 +248,59 @@ func DashboardAdmin(res http.ResponseWriter, req *http.Request) {
 		"admin_id": adminID,
 	}
 	json.NewEncoder(res).Encode(resp)
+}
+
+func RegisterAdmin(respw http.ResponseWriter, req *http.Request) {
+	var adminDetails model.Admin
+
+	// Parsing body JSON untuk mendapatkan data admin
+	if err := json.NewDecoder(req.Body).Decode(&adminDetails); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+		return
+	}
+
+	// Validasi jika username atau password kosong
+	if adminDetails.Username == "" || adminDetails.Password == "" {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Username and password are required"})
+		return
+	}
+
+	// Cek apakah username sudah ada di database
+	var existingAdmin model.Admin
+	err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": adminDetails.Username}, &existingAdmin)
+	if err == nil {
+		// Jika admin dengan username yang sama sudah ada
+		helper.WriteJSON(respw, http.StatusConflict, map[string]string{"message": "Username already exists"})
+		return
+	}
+
+	// Hash password sebelum disimpan ke database
+	hashedPassword, err := config.HashPassword(adminDetails.Password)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to hash password"})
+		return
+	}
+
+	// Membuat admin baru
+	newAdmin := model.Admin{
+		Username: adminDetails.Username,
+		Password: hashedPassword,
+	}
+
+	// Menyimpan admin baru ke dalam koleksi "admin"
+	collection := config.Mongoconn.Collection("admin")
+	ctx := context.Background()
+
+	// Menyimpan data admin
+	_, err = collection.InsertOne(ctx, newAdmin)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to register admin"})
+		return
+	}
+
+	// Kirim respons berhasil
+	helper.WriteJSON(respw, http.StatusCreated, map[string]string{
+		"status":   "Admin registered successfully",
+		"username": newAdmin.Username,
+	})
 }

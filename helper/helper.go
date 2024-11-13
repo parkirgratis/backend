@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
@@ -55,4 +56,12 @@ func GetIPaddress() string {
 		log.Fatal(err)
 	}
 	return string(body)
+}
+
+func NewRequest(method, url string, body *bytes.Buffer) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
 }

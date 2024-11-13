@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/config"
 	"github.com/gocroot/model"

@@ -10,5 +10,7 @@ var PublicKeyWhatsAuth string
 
 var WAAPIToken string
 
+var WAAPIGetDevice string = "https://api.wa.my.id/api/device/"
+
 var GitHubAccessToken, GitHubAuthorName, GitHubAuthorEmail string
 

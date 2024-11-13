@@ -2,7 +2,7 @@ package config
 
 import (
 	"log"
-
+	"os"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
@@ -10,6 +10,8 @@ import (
 )
 
 var IPPort, Net = helper.GetAddress()
+
+var PrivateKey string = os.Getenv("PRKEY")
 
 func SetEnv() {
 	if ErrorMongoconn != nil {

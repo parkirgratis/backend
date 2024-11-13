@@ -426,14 +426,14 @@ func ValidateAndFetchData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI("mongodb")
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		http.Error(w, "Database connection failed", http.StatusInternalServerError)
 		return
 	}
 	defer client.Disconnect(context.TODO())
-	usersCollection := client.Database("your_database_name").Collection("users")
+	usersCollection := client.Database("parkir_db").Collection("users")
 
 	var user bson.M
 	err = usersCollection.FindOne(context.TODO(), bson.M{"no_wa": noWa}).Decode(&user)
@@ -444,20 +444,20 @@ func ValidateAndFetchData(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get("https://asia-southeast2-awangga.cloudfunctions.net/petabackend/data/gis/lokasi")
 	if err != nil || resp.StatusCode != http.StatusOK {
-		http.Error(w, "Failed to fetch data from dosen endpoint", http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch data from endpoint error", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
-	var dosenData map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&dosenData); err != nil {
-		http.Error(w, "Failed to decode response from dosen", http.StatusInternalServerError)
+	var endpointData map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&endpointData); err != nil {
+		http.Error(w, "Failed to decode response", http.StatusInternalServerError)
 		return
 	}
 
-	parkirCollection := client.Database("your_database_name").Collection("parkir")
+	parkirCollection := client.Database("parkir_db").Collection("parkir")
 
-	_, err = parkirCollection.InsertOne(context.TODO(), dosenData)
+	_, err = parkirCollection.InsertOne(context.TODO(), endpointData)
 	if err != nil {
 		http.Error(w, "Failed to save data", http.StatusInternalServerError)
 		return

@@ -414,7 +414,7 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 }
 
 func ValidateAndFetchData(w http.ResponseWriter, r *http.Request) {
-	token := r.Header.Get("Authorization")
+	token := r.Header.Get("login")
 	if token == "" {
 		http.Error(w, "Unauthorized: Token is missing", http.StatusUnauthorized)
 		return

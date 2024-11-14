@@ -12,4 +12,4 @@ type Profile struct {
 	URL         string `bson:"url"`
 	QRKeyword   string `bson:"qrkeyword"`
 	PublicKey   string `bson:"publickey"`
-}
+}	

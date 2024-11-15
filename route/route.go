@@ -64,12 +64,15 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetSaran(w, r)
 	case method == "POST" && path == "/data/saran":
 		controller.PostSaran(w, r)
-	case method == "POST" && path == "/data/warung":
-		controller.PostTempatWarung(w, r)
 	case method == "PUT" && path == "/data/saran":
 		controller.PutSaran(w, r)
 	case method == "DELETE" && path == "/data/saran":
 		controller.DeleteSaran(w, r)
+	
+	//Warung Route
+	case method == "POST" && path == "/data/warung":
+	controller.PostTempatWarung(w, r)
+
 	case method == "GET" && path == "/admin/dashboard":
 		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmin)).ServeHTTP(w, r)
 	default:

@@ -3,15 +3,29 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
-	"github.com/whatsauth/itmodel"
+	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
+	"github.com/whatsauth/itmodel"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func GetaAllWarung(respw http.ResponseWriter, req *http.Request) {
+	var resp itmodel.Response
+	warung, err := atdb.GetAllDoc[[]model.Warung](config.Mongoconn, "warung", bson.M{})
+	if err != nil {
+		resp.Response = err.Error()
+		helper.WriteJSON(respw, http.StatusBadRequest, resp)
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, warung)
+
+}
 
 func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	var tempatWarung model.Warung

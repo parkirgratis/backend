@@ -59,7 +59,7 @@ func PutTokenDataUser(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if hcode == http.StatusOK && !qrstat.Status {
-		docuser.LinkedDevice, err = watoken.EncodeforHours(docuser.PhoneNumber, docuser.Name, int32(43830))
+		docuser.LinkedDevice, err = watoken.EncodeforHours(docuser.PhoneNumber, docuser.Name, config.PrivateKey, 43830)
 		if err != nil {
 			at.WriteJSON(respw, http.StatusFailedDependency, docuser)
 			return

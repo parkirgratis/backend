@@ -7,6 +7,15 @@ type Response struct {
 	Location string `json:"location,omitempty"`
 }
 
+type Profile struct {
+	Token       string `bson:"token"`
+	Phonenumber string `bson:"phonenumber"`
+	Secret      string `bson:"secret"`
+	URL         string `bson:"url"`
+	QRKeyword   string `bson:"qrkeyword"`
+	PublicKey   string `bson:"publickey"`
+}
+
 type SenderDasboard struct {
 	Phonenumber string `bson:"phonenumber"`
 	Botname     string `bson:"botname"`

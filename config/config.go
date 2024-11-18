@@ -3,25 +3,31 @@ package config
 import (
 	"log"
 	"os"
-	"github.com/gocroot/helper"
+
+	"github.com/gocroot/helper/at"
 	"github.com/gocroot/helper/atdb"
-	"github.com/gocroot/model"
+	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var IPPort, Net = helper.GetAddress()
-
 var PrivateKey string = os.Getenv("PRKEY")
+
+var IPPort, Net = at.GetAddress()
+
+var PhoneNumber string = os.Getenv("PHONENUMBER")
+
+var Profile itmodel.Profile
 
 func SetEnv() {
 	if ErrorMongoconn != nil {
 		log.Println(ErrorMongoconn.Error())
 	}
-	profile, err := atdb.GetOneDoc[model.Profile](Mongoconn, "profile", primitive.M{})
+	Profile, err := atdb.GetOneDoc[itmodel.Profile](Mongoconn, "profile", primitive.M{"phonenumber": PhoneNumber})
 	if err != nil {
 		log.Println(err)
 	}
-	PublicKeyWhatsAuth = profile.PublicKey
-	WAAPIToken = profile.Token
+	PublicKeyWhatsAuth = Profile.PublicKey
+	WAAPIToken = Profile.Token
 }
-const MongoURI = "mongodb+srv://irgifauzi:%40Sasuke123@webservice.rq9zk4m.mongodb.net/"
+
+var GHAccessToken string = os.Getenv("GH_ACCESS_TOKEN")

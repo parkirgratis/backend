@@ -50,32 +50,39 @@ func DeleteSaran(respw http.ResponseWriter, req *http.Request) {
 		ID string `json:"id"`
 	}
 
+	// Decode JSON request body
 	if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid JSON data"})
 		return
 	}
 
+	// Convert ID to ObjectID
 	objectId, err := primitive.ObjectIDFromHex(requestBody.ID)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid ID format"})
 		return
 	}
 
+	// Create filter
 	filter := bson.M{"_id": objectId}
 
-	deletedCount, err := atdb.DeleteOneDoc(config.Mongoconn, "saran", filter)
+	// Delete the document
+	deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "saran", filter)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete document", "error": err.Error()})
 		return
 	}
 
-	if deletedCount == 0 {
+	// Check if any document was deleted
+	if deleteResult.DeletedCount == 0 {
 		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Document not found"})
 		return
 	}
 
+	// Send success response
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Document deleted successfully"})
 }
+
 
 func PutSaran(respw http.ResponseWriter, req *http.Request) {
 	var newSaran model.Saran
@@ -96,7 +103,7 @@ func PutSaran(respw http.ResponseWriter, req *http.Request) {
 	fmt.Println("Filter:", filter)
 	fmt.Println("Update:", update)
 
-	result, err := atdb.UpdateDoc(config.Mongoconn, "saran", filter, update)
+	result, err := atdb.UpdateOneDoc(config.Mongoconn, "saran", filter, update)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return

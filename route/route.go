@@ -104,6 +104,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	//mendapatkan data faq
 	case method == "GET" && at.URLParam(path, "/data/faq/:id"):
 		controller.GetFAQ(w, r)
+	case method == "POST" && at.URLParam(path, "/data/user/wa/:nomorwa"):
+		controller.PostDataUserFromWA(w, r)
 
 	// Rute untuk fitur Warung.
 	case method == "POST" && path == "/data/warung":

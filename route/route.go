@@ -76,6 +76,34 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/saran":
 		controller.DeleteSaran(w, r) // Menghapus data saran.
 
+	//user data
+	case method == "GET" && path == "/data/user":
+		controller.GetDataUser(w, r)
+	//mendapatkan data sent item
+	case method == "GET" && at.URLParam(path, "/data/peserta/sent/:id"):
+		controller.GetSentItem(w, r)
+	//simpan feedback unsubs user
+	case method == "POST" && path == "/data/peserta/unsubscribe":
+		controller.PostUnsubscribe(w, r)
+	//generate token linked device
+	case method == "PUT" && path == "/data/user":
+		controller.PutTokenDataUser(w, r)
+	//Menambhahkan data nomor sender untuk broadcast
+	case method == "PUT" && path == "/data/sender":
+		controller.PutNomorBlast(w, r)
+	//mendapatkan data list nomor sender untuk broadcast
+	case method == "GET" && path == "/data/sender":
+		controller.GetDataSenders(w, r)
+	//mendapatkan data list nomor sender yang kena blokir dari broadcast
+	case method == "GET" && path == "/data/blokir":
+		controller.GetDataSendersTerblokir(w, r)
+	//mendapatkan data rekap pengiriman wa blast
+	case method == "GET" && path == "/data/rekap":
+		controller.GetRekapBlast(w, r)
+	//mendapatkan data faq
+	case method == "GET" && at.URLParam(path, "/data/faq/:id"):
+		controller.GetFAQ(w, r)
+
 	// Rute untuk fitur Warung.
 	case method == "POST" && path == "/data/warung":
 		controller.PostTempatWarung(w, r) // Menambahkan data warung.

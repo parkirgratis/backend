@@ -25,10 +25,6 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		// Rute untuk fitur ParkirGratis
 	case method == "GET" && path == "/data/lokasi":
 		controller.GetLokasi(w, r) // Mengambil data lokasi parkir.
-	case method == "GET" && path == "/data/user":
-		controller.GetDataUser(w, r) // Mengambil data pengguna.
-	case method == "PUT" && path == "/data/user":
-		controller.PutTokenDataUser(w, r) // Update token pengguna.
 	case method == "GET" && path == "/data/marker":
 		controller.GetMarker(w, r) // Mendapatkan data marker lokasi.
 	case method == "GET" && path == "/data/search-namatempat":

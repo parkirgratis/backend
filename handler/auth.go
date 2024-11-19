@@ -159,43 +159,52 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 
 // Login memproses login admin dan menghasilkan token
 func Login(respw http.ResponseWriter, req *http.Request) {
-	var loginDetails model.Admin
-	if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
-		return
-	}
+    var loginDetails model.Admin
+    if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
+        helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+        return
+    }
 
-	var storedAdmin model.Admin
-	// Mencari admin berdasarkan username
-	if err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
-		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
-		return
-	}
+    var storedAdmin model.Admin
+    // Mencari admin berdasarkan username
+    if err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
+        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+        return
+    }
 
-	// Memeriksa kecocokan password
-	if !config.CheckPasswordHash(loginDetails.Password, storedAdmin.Password) {
-		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
-		return
-	}
+    // Memeriksa kecocokan password
+    if !config.CheckPasswordHash(loginDetails.Password, storedAdmin.Password) {
+        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+        return
+    }
 
-	// Menghasilkan token JWT
-	token, err := config.GenerateJWT(storedAdmin.ID.Hex())
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})
-		return
-	}
+    // Menghasilkan token JWT
+    token, err := config.GenerateJWT(storedAdmin.ID.Hex())
+    if err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})
+        return
+    }
 
-	// Simpan token ke MongoDB
-	if err := SaveTokenToMongoWithParams(respw, req); err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not save token"})
-		return
-	}
+    // Simpan token ke MongoDB
+    collection := config.Mongoconn.Collection("tokens")
+    ctx := context.Background()
+    newToken := model.Token{
+        AdminID:   storedAdmin.ID.Hex(),
+        Token:     token,
+        CreatedAt: time.Now(),
+    }
 
-	// Kirim respons berhasil
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{
-		"status": "Login successful",
-		"token":  token,
-	})
+    _, err = collection.InsertOne(ctx, newToken)
+    if err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not save token"})
+        return
+    }
+
+    // Kirim respons berhasil
+    helper.WriteJSON(respw, http.StatusOK, map[string]string{
+        "status": "Login successful",
+        "token":  token,
+    })
 }
 
 // Logout memproses permintaan logout dan menghapus token dari database

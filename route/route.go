@@ -54,6 +54,10 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/koordinat":
 		controller.DeleteKoordinat(w, r) // Menghapus koordinat.
 
+	//Google Handler'
+	case method == "POST" && path == "/auth/regis":
+		controller.RegisterAccountParkir(w, r)
+
 	// Rute untuk admin (login, logout, register, dashboard, aktivitas).
 	case method == "POST" && path == "/admin/login":
 		handler.Login(w, r) // Login admin.
@@ -86,7 +90,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	//simpan feedback unsubs user
 	case method == "POST" && path == "/data/peserta/unsubscribe":
 		controller.PostUnsubscribe(w, r)
-	case method == "POST" && path == "/data/peserta/unsubscribe":
+	case method == "POST" && path == "/data/user":
 		controller.PostDataUser(w, r)
 	//generate token linked device
 	case method == "PUT" && path == "/data/user":

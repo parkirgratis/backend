@@ -546,3 +546,75 @@ func ResendPasswordHandler(respw http.ResponseWriter, r *http.Request) {
 	// Send the random password via WhatsApp
 	auth.SendWhatsAppPassword(respw, request.PhoneNumber, randomPassword)
 }
+
+func RegisterAccountParkir(respw http.ResponseWriter, r *http.Request) {
+	var request model.Userdomyikado
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		respn := model.Response{
+			Status:   "Invalid Request",
+			Response: err.Error(),
+		}
+		at.WriteJSON(respw, http.StatusBadRequest, respn)
+		return
+	}
+
+	re := regexp.MustCompile(`^62\d{9,15}$`)
+	if !re.MatchString(request.PhoneNumber) {
+		respn := model.Response{
+			Status:   "Bad Request",
+			Response: "Invalid phone number format",
+		}
+		at.WriteJSON(respw, http.StatusBadRequest, respn)
+		return
+	}
+
+	hashedPassword, err := auth.HashPassword(request.Password)
+	if err != nil {
+		respn := model.Response{
+			Status:   "Failed to hash password",
+			Response: err.Error(),
+		}
+		at.WriteJSON(respw, http.StatusInternalServerError, respn)
+		return
+	}
+
+	role := request.Role
+	if role == "" {
+		role = "user"
+	}
+
+	newUser := model.Userdomyikado{
+		Name:          request.Name,
+		PhoneNumber:   request.PhoneNumber,
+		Email:         request.Email,
+		Team:          "pd.my.id",
+		Scope:         "dev",
+		LinkedDevice:  "v4.public.eyJhbGlhcyI6IlJheWZhbiBBcWJpbGxhaCIsImV4cCI6IjIwMjQtMTEtMjBUMDA6NDI6NDdaIiwiaWF0IjoiMjAyNC0xMS0xOVQwNjo0Mjo0N1oiLCJpZCI6IjYyODU4ODM4MDMyMDYiLCJuYmYiOiIyMDI0LTExLTE5VDA2OjQyOjQ3WiJ9CJ-9dB4dbE5jrtFjwxnTgCS2waB6SLX9OXsp_qAKAzAXKCYl83gXzAXeHIEK7YxD68it9qvZKe7Fjw2jxU23CQ",
+		JumlahAntrian: 7,
+		Password:      hashedPassword,
+		Role:          role,
+	}
+
+	_, err = atdb.InsertOneDoc(config.Mongoconn, "user", newUser)
+	if err != nil {
+		respn := model.Response{
+			Status:   "Failed to insert new user",
+			Response: err.Error(),
+		}
+		at.WriteJSON(respw, http.StatusInternalServerError, respn)
+		return
+	}
+
+	response := map[string]interface{}{
+		"message":       "New user created successfully",
+		"name":          newUser.Name,
+		"phonenumber":   newUser.PhoneNumber,
+		"email":         newUser.Email,
+		"team":          newUser.Team,
+		"scope":         newUser.Scope,
+		"jumlahAntrian": newUser.JumlahAntrian,
+		"role":          newUser.Role,
+	}
+
+	at.WriteJSON(respw, http.StatusOK, response)
+}

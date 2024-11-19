@@ -86,6 +86,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	//simpan feedback unsubs user
 	case method == "POST" && path == "/data/peserta/unsubscribe":
 		controller.PostUnsubscribe(w, r)
+	case method == "POST" && path == "/data/peserta/unsubscribe":
+		controller.PostDataUser(w, r)
 	//generate token linked device
 	case method == "PUT" && path == "/data/user":
 		controller.PutTokenDataUser(w, r)

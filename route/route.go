@@ -115,6 +115,10 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "GET" && path == "/data/warung":
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.
 
+	//Location Nembak Endpoint
+case method == "POST" && path == "/data/locations":
+	controller.SaveLocation(w, r) // Menambahkan data warung.
+
 	// Rute default untuk request yang tidak dikenali.
 	default:
 		controller.NotFound(w, r) // Mengembalikan response 404 jika rute tidak ditemukan.

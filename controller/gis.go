@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"encoding/json"
 	"net/http"
 	"github.com/gocroot/helper/at"
@@ -10,33 +9,14 @@ import (
 	"github.com/gocroot/helper/atdb"
 )
 
-func SyncDataFromPetapediaAPI(respw http.ResponseWriter, req *http.Request) {
-    petapediadAPI := "https://asia-southeast2-awangga.cloudfunctions.net/petabackend/data/gis/lokasi"
-    resp, err := http.Get(petapediadAPI)
+func SyncDataPetapediaBackend(respw http.ResponseWriter, req *http.Request) {
+    var locations []model.Region
+    err := json.NewDecoder(req.Body).Decode(&locations)
     if err != nil {
         var respn model.Response
-        respn.Status = "Error : Tidak dapat mengakses API teman"
+        respn.Status = "Error : Data yang diterima tidak valid"
         respn.Response = err.Error()
-        at.WriteJSON(respw, http.StatusInternalServerError, respn)
-        return
-    }
-    defer resp.Body.Close()
-
-    if resp.StatusCode != http.StatusOK {
-        var respn model.Response
-        respn.Status = "Error : Response API teman gagal"
-        respn.Response = fmt.Sprintf("Status code: %d", resp.StatusCode)
         at.WriteJSON(respw, http.StatusBadRequest, respn)
-        return
-    }
-
-    var locations []model.Region 
-    err = json.NewDecoder(resp.Body).Decode(&locations)
-    if err != nil {
-        var respn model.Response
-        respn.Status = "Error : Gagal decode data dari API teman"
-        respn.Response = err.Error()
-        at.WriteJSON(respw, http.StatusInternalServerError, respn)
         return
     }
 
@@ -53,7 +33,7 @@ func SyncDataFromPetapediaAPI(respw http.ResponseWriter, req *http.Request) {
 
     var respn model.Response
     respn.Status = "Sukses"
-    respn.Response = "Data berhasil disinkronkan dari API teman"
+    respn.Response = "Data berhasil disimpan ke database"
     at.WriteJSON(respw, http.StatusOK, respn)
 }
 

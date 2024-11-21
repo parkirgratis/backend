@@ -116,8 +116,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.
 
 	//Location Nembak Endpoint
-case method == "POST" && path == "/data/locations":
-	controller.SaveLocation(w, r) // Menambahkan data warung.
+case method == "POST" && path == "/data/gis/lokasi":
+	controller.SyncDataFromPetapediaAPI(w, r) // Menambahkan data warung.
 
 	// Rute default untuk request yang tidak dikenali.
 	default:

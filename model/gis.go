@@ -15,3 +15,8 @@ type Region struct {
 	Village     string             `bson:"village" json:"village"`
 	Border      Location           `bson:"border" json:"border"`
 }
+
+type LongLat struct {
+	Longitude float64 `bson:"long" json:"long"`
+	Latitude  float64 `bson:"lat" json:"lat"`
+}

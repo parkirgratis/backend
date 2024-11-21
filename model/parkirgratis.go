@@ -45,11 +45,3 @@ type Activity struct {
     Action    string             `bson:"action,omitempty" json:"action,omitempty"`
     Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
 }
-
-type Location struct {
-	ID        string    `json:"id,omitempty" bson:"_id,omitempty"`
-	Longitude float64   `json:"longitude" bson:"longitude"`
-	Latitude  float64   `json:"latitude" bson:"latitude"`
-	Region    string    `json:"region" bson:"region"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
-}

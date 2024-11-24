@@ -117,7 +117,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 
 	//Location Nembak Endpoint
 case method == "POST" && path == "/data/gis/lokasi":
-	controller.SyncDataPetapediaBackend(w, r) // Menambahkan data warung.
+	controller.SyncDataWithPetapedia(w, r) // Menambahkan data warung.
 
 	// Rute default untuk request yang tidak dikenali.
 	default:

@@ -10,7 +10,6 @@ type Region struct {
 	Latitude  float64            `bson:"latitude" json:"latitude"`
 }
 
-// Struct GeoJSON untuk border (polygon/point)
 type GeoJSON struct {
 	Type        string        `bson:"type" json:"type"`
 	Coordinates interface{}   `bson:"coordinates" json:"coordinates"`

@@ -24,7 +24,6 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Set the Petapedia API endpoint
 	petapediaAPI := "https://asia-southeast2-awangga.cloudfunctions.net/petabackend/data/gis/lokasi"
 
 	requestBody, err := json.Marshal(coordinates)

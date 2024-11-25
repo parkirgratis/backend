@@ -11,21 +11,20 @@ import (
 	"github.com/gocroot/helper/at"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
-	"github.com/gocroot/helper/watoken"
 )
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
-	//validate watoken
-	_, err := watoken.Decode(config.PublicKeyWhatsAuth, at.GetLoginFromHeader(req))
-	if err != nil {
-		at.WriteJSON(respw, http.StatusForbidden, map[string]string{
-			"error": "Invalid token",
-		})
-		return
-	}
+	// //validate watoken
+	// _, err := watoken.Decode(config.PublicKeyWhatsAuth, at.GetLoginFromHeader(req))
+	// if err != nil {
+	// 	at.WriteJSON(respw, http.StatusForbidden, map[string]string{
+	// 		"error": "Invalid token",
+	// 	})
+	// 	return
+	// }
 
 	var longlat model.LongLat
-	err = json.NewDecoder(req.Body).Decode(&longlat)
+	err := json.NewDecoder(req.Body).Decode(&longlat)
 	if err != nil {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Invalid JSON format",

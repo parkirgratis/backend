@@ -24,21 +24,20 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 	// }
 
 	var longlat model.LongLat
-	err := json.NewDecoder(req.Body).Decode(&longlat)
-	if err != nil {
-		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
-			"error": "Invalid JSON format",
-		})
-		return
-	}
-
-	if longlat.Latitude == 0 || longlat.Longitude == 0 {
+	if err := json.NewDecoder(req.Body).Decode(&longlat); err != nil || longlat.Latitude == 0 || longlat.Longitude == 0 {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Invalid latitude or longitude",
 		})
 		return
 	}
 
+	if longlat.Latitude < -90 || longlat.Latitude > 90 || longlat.Longitude < -180 || longlat.Longitude > 180 {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Latitude or longitude out of range",
+		})
+		return
+	}
+	
 	petapediaAPI := "https://asia-southeast2-awangga.cloudfunctions.net/petabackend/data/gis/lokasi"
 
 	requestBody, err := json.Marshal(longlat)

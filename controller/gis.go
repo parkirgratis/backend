@@ -15,6 +15,7 @@ import (
 )
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
+	//validate watoken
 	_, err := watoken.Decode(config.PublicKeyWhatsAuth, at.GetLoginFromHeader(req))
 	if err != nil {
 		at.WriteJSON(respw, http.StatusForbidden, map[string]string{

@@ -9,8 +9,8 @@ import (
     "github.com/gocroot/helper/at"
     "github.com/gocroot/helper/atdb"
     "github.com/gocroot/model"
-    "go.mongodb.org/mongo-driver/bson"
 )
+
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
     // Validasi dan decode body
@@ -22,28 +22,23 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    if longlat.Latitude < -90 || longlat.Latitude > 90 || longlat.Longitude < -180 || longlat.Longitude > 180 {
-        at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
-            "error": "Latitude or longitude out of range",
-        })
-        return
-    }
-
-    filter := bson.M{
-        "border": bson.M{
-            "$geoIntersects": bson.M{
-                "$geometry": bson.M{
-                    "type":        "Point",
-                    "coordinates": []float64{longlat.Longitude, longlat.Latitude},
+    region := model.Region{
+        Province:    "", // Biarkan aja kosong
+        District:    "", // Biarkan aja kosong
+        SubDistrict: "", // Biarkan aja kosong
+        Village:     "", // Biarkan aja kosong
+        Border: model.Location{
+            Type: "Point", // GeoJSON tipe Point
+            Coordinates: [][][]float64{
+                {
+                    {longlat.Longitude, longlat.Latitude}, // Koordina
                 },
             },
         },
     }
 
-    // Ambil region dari database Petapedia
-
-    // Simpan region ke database ParkirGratis
-    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", filter)
+    // Simpan data region ke MongoDB
+    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
     if err != nil {
         log.Println("Error saving region to MongoDB:", err)
         at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{
@@ -55,6 +50,6 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
     // Response sukses
     at.WriteJSON(respw, http.StatusOK, map[string]string{
         "status":  "Success",
-        "message": "Region successfully synced from Petapedia and saved to MongoDB",
+        "message": "Region successfully saved to MongoDB",
     })
 }

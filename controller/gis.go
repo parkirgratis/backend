@@ -22,23 +22,33 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
         return
     }
 
+    // Tambahkan data lokasi yang diterima
+    var regionData model.Region
+    err := json.NewDecoder(req.Body).Decode(&regionData) // Decode the region data including province, district, etc.
+    if err != nil {
+        at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+            "error": "Invalid region data",
+        })
+        return
+    }
+
     region := model.Region{
-        Province:    "", // Biarkan aja kosong
-        District:    "", // Biarkan aja kosong
-        SubDistrict: "", // Biarkan aja kosong
-        Village:     "", // Biarkan aja kosong
+        Province:    regionData.Province,
+        District:    regionData.District, 
+        SubDistrict: regionData.SubDistrict,
+        Village:     regionData.Village,
         Border: model.Location{
-            Type: "Point", // GeoJSON tipe Point
+            Type: "Point",
             Coordinates: [][][]float64{
                 {
-                    {longlat.Longitude, longlat.Latitude}, // Koordina
+                    {longlat.Longitude, longlat.Latitude},
                 },
             },
         },
     }
 
     // Simpan data region ke MongoDB
-    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
+    _, err = atdb.InsertOneDoc(config.Mongoconn, "region", region)
     if err != nil {
         log.Println("Error saving region to MongoDB:", err)
         at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{

@@ -9,9 +9,11 @@ import (
     "github.com/gocroot/helper/at"
     "github.com/gocroot/helper/atdb"
     "github.com/gocroot/model"
+    "go.mongodb.org/mongo-driver/bson"
 )
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
+    // Validasi dan decode body
     var longlat model.LongLat
     if err := json.NewDecoder(req.Body).Decode(&longlat); err != nil || longlat.Latitude == 0 || longlat.Longitude == 0 {
         at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
@@ -27,36 +29,39 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // Membuat struktur Coordinates untuk menyimpan longitude dan latitude
-    coordinates := [][][]float64{
-        {
-            {longlat.Longitude, longlat.Latitude}, // Longitude dan Latitude
+    filter := bson.M{
+        "border": bson.M{
+            "$geoIntersects": bson.M{
+                "$geometry": bson.M{
+                    "type":        "Point",
+                    "coordinates": []float64{longlat.Longitude, longlat.Latitude},
+                },
+            },
         },
     }
 
-    // Membuat objek Location dengan koordinat yang sudah disesuaikan
-    location := model.Location{
-        Type:        "Point", // Tipe GeoJSON (Point, LineString, Polygon, dll)
-        Coordinates: coordinates,
-    }
-
-    // Membuat objek Region dan menyimpan lokasi
-    region := model.Region{
-        Border: location,
-    }
-
-    // Menyimpan data ke MongoDB
-    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
+    // Ambil region dari database Petapedia
+    region, err := atdb.GetOneDoc[model.Region](config.Mongoconn, "region", filter)
     if err != nil {
-        log.Println("Error saving region to MongoDB:", err)
-        at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{
-            "error": "Failed to save data to MongoDB",
+        at.WriteJSON(respw, http.StatusNotFound, map[string]string{
+            "error": "Region not found in Petapedia",
         })
         return
     }
 
-    var response model.Response
-    response.Status = "Success"
-    response.Response = "Data has been successfully synced and saved to MongoDB"
-    at.WriteJSON(respw, http.StatusOK, response)
+    // Simpan region ke database ParkirGratis
+    _, err = atdb.InsertOneDoc(config.Mongoconn, "region", region)
+    if err != nil {
+        log.Println("Error saving region to MongoDB:", err)
+        at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{
+            "error": "Failed to save region to MongoDB",
+        })
+        return
+    }
+
+    // Response sukses
+    at.WriteJSON(respw, http.StatusOK, map[string]string{
+        "status":  "Success",
+        "message": "Region successfully synced from Petapedia and saved to MongoDB",
+    })
 }

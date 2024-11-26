@@ -25,3 +25,9 @@ type LongLat struct {
 	Longitude float64 `bson:"long" json:"long"`
 	Latitude  float64 `bson:"lat" json:"lat"`
 }
+
+type LocationData struct {
+    Latitude  float64 `json:"lat"`
+    Longitude float64 `json:"long"`
+    Region    model.Region `json:"region"`
+}

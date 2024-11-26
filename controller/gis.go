@@ -13,42 +13,33 @@ import (
 
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
-    // Validasi dan decode body
-    var longlat model.LongLat
-    if err := json.NewDecoder(req.Body).Decode(&longlat); err != nil || longlat.Latitude == 0 || longlat.Longitude == 0 {
+    // Validasi dan decode body menjadi satu struct
+    var locationData LocationData
+    if err := json.NewDecoder(req.Body).Decode(&locationData); err != nil || locationData.Latitude == 0 || locationData.Longitude == 0 {
         at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
             "error": "Invalid latitude or longitude",
         })
         return
     }
 
-    // Tambahkan data lokasi yang diterima
-    var regionData model.Region
-    err := json.NewDecoder(req.Body).Decode(&regionData) // Decode the region data including province, district, etc.
-    if err != nil {
-        at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
-            "error": "Invalid region data",
-        })
-        return
-    }
-
+    // Membuat region dan menambahkan data lokasi
     region := model.Region{
-        Province:    regionData.Province,
-        District:    regionData.District, 
-        SubDistrict: regionData.SubDistrict,
-        Village:     regionData.Village,
+        Province:    locationData.Region.Province,
+        District:    locationData.Region.District, 
+        SubDistrict: locationData.Region.SubDistrict,
+        Village:     locationData.Region.Village,
         Border: model.Location{
             Type: "Point",
             Coordinates: [][][]float64{
                 {
-                    {longlat.Longitude, longlat.Latitude},
+                    {locationData.Longitude, locationData.Latitude},
                 },
             },
         },
     }
 
     // Simpan data region ke MongoDB
-    _, err = atdb.InsertOneDoc(config.Mongoconn, "region", region)
+    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
     if err != nil {
         log.Println("Error saving region to MongoDB:", err)
         at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{

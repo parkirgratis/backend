@@ -41,16 +41,9 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
     }
 
     // Ambil region dari database Petapedia
-    region, err := atdb.GetOneDoc[model.Region](config.Mongoconn, "region", filter)
-    if err != nil {
-        at.WriteJSON(respw, http.StatusNotFound, map[string]string{
-            "error": "Region not found in Petapedia",
-        })
-        return
-    }
 
     // Simpan region ke database ParkirGratis
-    _, err = atdb.InsertOneDoc(config.Mongoconn, "region", region)
+    _, err := atdb.InsertOneDoc(config.Mongoconn, "region", filter)
     if err != nil {
         log.Println("Error saving region to MongoDB:", err)
         at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{

@@ -29,5 +29,5 @@ type LongLat struct {
 type LocationData struct {
     Latitude  float64 `json:"lat"`
     Longitude float64 `json:"long"`
-    Region    model.Region `json:"region"`
+    Region    Region `json:"region"`
 }

@@ -14,7 +14,7 @@ import (
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
     // Validasi dan decode body menjadi satu struct
-    var locationData LocationData
+    var locationData model.LocationData
     if err := json.NewDecoder(req.Body).Decode(&locationData); err != nil || locationData.Latitude == 0 || locationData.Longitude == 0 {
         at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
             "error": "Invalid latitude or longitude",

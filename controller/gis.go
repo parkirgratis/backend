@@ -20,15 +20,7 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 		})
 		return
 	}
-
-	if locationData.Region.Province == "" || locationData.Region.District == "" ||
-		locationData.Region.SubDistrict == "" || locationData.Region.Village == "" {
-		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
-			"error": "Incomplete region data",
-		})
-		return
-	}
-
+	
 	// Membuat region dan menambahkan data lokasi
 	region := model.Region{
 		Province:    locationData.Region.Province,
@@ -60,4 +52,4 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
         "message": "Region successfully saved to MongoDB",
         "data":    region,
     })
-}
+}	

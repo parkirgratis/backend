@@ -38,7 +38,7 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 	id := updateRequest.ID
 	if id.IsZero() {
 		var err error
-		id, err = primitive.ObjectIDFromHex("669510e39590720071a5691d")
+		id, err = primitive.ObjectIDFromHex("67488d0a8589c79bf4ff6d77")
 		if err != nil {
 			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Invalid default ID"})
 			return

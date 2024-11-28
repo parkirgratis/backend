@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,8 +11,6 @@ import (
 	"github.com/gocroot/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func GetMarker(respw http.ResponseWriter, req *http.Request) {
@@ -31,42 +28,41 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 		Markers [][]float64        `json:"markers"`
 	}
 
+	// Decode request body
 	if err := json.NewDecoder(req.Body).Decode(&updateRequest); err != nil {
-		http.Error(respw, err.Error(), http.StatusBadRequest)
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
+	// Default ID jika tidak diberikan
 	id := updateRequest.ID
 	if id.IsZero() {
-		defaultID, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+		var err error
+		id, err = primitive.ObjectIDFromHex("669510e39590720071a5691d")
 		if err != nil {
-			http.Error(respw, "Invalid default ID", http.StatusInternalServerError)
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Invalid default ID"})
 			return
 		}
-		id = defaultID
 	}
 
+	
 	filter := bson.M{"_id": id}
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://irgifauzi:%40Sasuke123@webservice.rq9zk4m.mongodb.net/"))
+
+	doc, err := atdb.GetOneDoc[model.Koordinat](config.Mongoconn, "marker", filter)
 	if err != nil {
-		http.Error(respw, err.Error(), http.StatusInternalServerError)
+		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"error": "Document not found"})
 		return
 	}
-	defer client.Disconnect(context.TODO())
 
-	collection := client.Database("parkir_db").Collection("marker")
-
-	var document struct {
-		Markers [][]float64 `bson:"markers"`
-	}
-	if err := collection.FindOne(context.TODO(), filter).Decode(&document); err != nil {
-		http.Error(respw, err.Error(), http.StatusInternalServerError)
+	if len(updateRequest.Markers) < 2 {
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid marker data"})
 		return
 	}
+
 
 	var index int = -1
-	for i, marker := range document.Markers {
+	for i, marker := range doc.Markers {
 		if len(marker) == 2 && marker[0] == updateRequest.Markers[0][0] && marker[1] == updateRequest.Markers[0][1] {
 			index = i
 			break
@@ -74,7 +70,7 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	if index == -1 {
-		http.Error(respw, "Marker not found", http.StatusBadRequest)
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Marker not found"})
 		return
 	}
 
@@ -84,13 +80,13 @@ func PutKoordinat(respw http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	if _, err := collection.UpdateOne(context.TODO(), filter, update); err != nil {
-		http.Error(respw, err.Error(), http.StatusInternalServerError)
+	_, err = atdb.UpdateOneDoc(config.Mongoconn, "marker", filter, update)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	respw.WriteHeader(http.StatusOK)
-	respw.Write([]byte("Coordinate updated"))
+	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Coordinate updated"})
 }
 
 func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {

@@ -55,13 +55,12 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Validasi panjang markers
 	if len(updateRequest.Markers) < 2 {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid marker data"})
 		return
 	}
 
-	// Cari indeks marker yang akan diupdate
+
 	var index int = -1
 	for i, marker := range doc.Markers {
 		if len(marker) == 2 && marker[0] == updateRequest.Markers[0][0] && marker[1] == updateRequest.Markers[0][1] {
@@ -75,7 +74,6 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Update marker pada indeks tertentu
 	update := bson.M{
 		"$set": bson.M{
 			fmt.Sprintf("markers.%d", index): updateRequest.Markers[1],

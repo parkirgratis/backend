@@ -129,3 +129,26 @@ func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
 }
+
+func PostKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
+	var newKoor model.Koordinat
+	if err := json.NewDecoder(req.Body).Decode(&newKoor); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
+		return
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
+
+	if _, err := atdb.UpdateOneDoc(config.Mongoconn, "marker_warung", filter, update); err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, "Markers updated")
+}

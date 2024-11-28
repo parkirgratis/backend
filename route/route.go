@@ -114,10 +114,13 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostTempatWarung(w, r) // Menambahkan data warung.
 	case method == "GET" && path == "/data/warung":
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.
+	case method == "DELETE" && path == "/data/warung":
+		controller.DeleteWarungById(w, r) // Mendapatkan semua data warung.
+
 
 	//Location Nembak Endpoint
 case method == "POST" && path == "/data/gis/lokasi":
-	controller.SyncDataWithPetapedia(w, r) // Menambahkan data warung.
+	controller.SyncDataWithPetapedia(w, r)
 
 	// Rute default untuk request yang tidak dikenali.
 	default:

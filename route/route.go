@@ -122,7 +122,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetMarkerWarung(w, r) 
 	case method == "PUT" && path == "/data/markerwarung":
 		controller.PutKoordinatWarung(w, r) 
-	
+	case method == "DELETE" && path == "/data/markerwarung":
+		controller.DeleteKoordinatWarung(w, r) 
 
 	//Location Nembak Endpoint
 case method == "POST" && path == "/data/gis/lokasi":

@@ -118,6 +118,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.DeleteTempatWarungById(w, r) // Delete data warung berdasarkan Id.
 	case method == "PUT" && path == "/data/warung":
 		controller.UpdateTempatWarungById(w, r) // Update/Edit data warung berdasarkan Id.
+	case method == "GET" && path == "/data/markerwarung":
+		controller.GetMarkerWarung(w, r) 
+
 
 	//Location Nembak Endpoint
 case method == "POST" && path == "/data/gis/lokasi":

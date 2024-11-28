@@ -16,3 +16,8 @@ type Warung struct {
 	Gambar             string             `bson:"foto_pratinjau,omitempty" json:"foto_pratinjau,omitempty"`
 	Tanggal_Verifikasi time.Time          `bson:"tanggal_verifikasi,omitempty" json:"tanggal_verifikasi,omitempty"`
 }
+
+type KoordinatWarung struct {
+	ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Markers [][]float64 `json:"markers"`
+}

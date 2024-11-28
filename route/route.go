@@ -11,15 +11,6 @@ import (
 	"github.com/gocroot/middleware"
 )
 
-// NearbyRoadHandler godoc
-// @Summary Mendapatkan jalan terdekat
-// @Description Mengambil data jalan terdekat berdasarkan koordinat yang diberikan
-// @Tags gis
-// @Accept json
-// @Produce json
-// @Success 200 {object} controller.NearbyRoadResponse
-// @Failure 400 {string} string "Bad Request"
-// @Router /nearby-road [get]
 func URL(w http.ResponseWriter, r *http.Request) {
 	if config.SetAccessControlHeaders(w, r) {
 		return

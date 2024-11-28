@@ -115,7 +115,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "GET" && path == "/data/warung":
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.
 	case method == "DELETE" && path == "/data/warung":
-		controller.DeleteWarungById(w, r) // Mendapatkan semua data warung.
+		controller.DeleteTempatWarungById(w, r) // Mendapatkan semua data warung.
 
 
 	//Location Nembak Endpoint

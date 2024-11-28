@@ -2,7 +2,6 @@ package model
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 type Warung struct {
@@ -14,7 +13,6 @@ type Warung struct {
 	Lon         	   float64            `bson:"lon,omitempty" json:"lon,omitempty"`
 	Lat         	   float64            `bson:"lat,omitempty" json:"lat,omitempty"`
 	Gambar             string             `bson:"foto_pratinjau,omitempty" json:"foto_pratinjau,omitempty"`
-	Tanggal_Verifikasi time.Time          `bson:"tanggal_verifikasi,omitempty" json:"tanggal_verifikasi,omitempty"`
 }
 
 type KoordinatWarung struct {

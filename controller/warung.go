@@ -48,3 +48,32 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Tempat warung berhasil disimpan dengan ID: %s", insertedID.Hex())})
 }
+
+func DeleteWarungById(respw http.ResponseWriter, req *http.Request) {
+	id := req.URL.Query().Get("id")
+	if id == "" {
+		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak valid"})
+		return
+	}
+
+	filter := bson.M{"_id": objectID}
+	result, err := config.Mongoconn.Collection("warung").DeleteOne(context.Background(), filter)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		helper.WriteJSON(respw, http.StatusNotFound, itmodel.Response{Response: "Data warung tidak ditemukan"})
+		return
+	}
+
+
+	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: "Data warung berhasil dihapus"})
+}

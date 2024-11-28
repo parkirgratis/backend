@@ -93,3 +93,39 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 	respw.WriteHeader(http.StatusOK)
 	respw.Write([]byte("Coordinate updated"))
 }
+
+func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
+	var deleteRequest struct {
+		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+		Markers [][]float64        `json:"markers"`
+	}
+
+	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id := deleteRequest.ID
+
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$pull": bson.M{
+			"markers": bson.M{
+				"$in": deleteRequest.Markers,
+			},
+		},
+	}
+
+	result, err := atdb.UpdateOneDoc(config.Mongoconn, "marker_warung", filter, update)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if result.ModifiedCount == 0 {
+		helper.WriteJSON(respw, http.StatusNotFound, "No markers found to delete")
+		return
+	}
+
+	helper.WriteJSON(respw, http.StatusOK, "Coordinates deleted")
+}

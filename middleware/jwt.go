@@ -1,13 +1,16 @@
 package middleware
 
 import (
+    "context"
     "errors"
     "fmt"
     "net/http"
     "strings"
+    "time"
 
     "github.com/golang-jwt/jwt/v4"
     "github.com/gocroot/config"
+    "go.mongodb.org/mongo-driver/bson"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -29,46 +32,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
         tokenString := parts[1]
         fmt.Println("Token received:", tokenString)
 
-        token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-            if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-                return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-            }
-            return []byte(config.JWTSecret), nil
-        })
-
+        claims, err := validateJWT(tokenString)
         if err != nil {
-            var ve *jwt.ValidationError
-            if errors.As(err, &ve) {
-                if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-                    fmt.Println("Token is malformed")
-                    http.Error(w, "Malformed token", http.StatusUnauthorized)
-                } else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-                    fmt.Println("Token is expired")
-                    http.Error(w, "Token expired", http.StatusUnauthorized)
-                } else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-                    fmt.Println("Token not valid yet")
-                    http.Error(w, "Token not valid yet", http.StatusUnauthorized)
-                } else {
-                    fmt.Println("Invalid token:", err)
-                    http.Error(w, "Invalid token", http.StatusUnauthorized)
-                }
-            } else {
-                fmt.Println("Error parsing token:", err)
-                http.Error(w, "Invalid token", http.StatusUnauthorized)
+            if err == jwt.ErrTokenExpired {
+                fmt.Println("Token is expired")
+                http.Error(w, "Token expired", http.StatusUnauthorized)
+
+                go deleteExpiredToken(tokenString)
+                return
             }
-            return
-        }
 
-        if !token.Valid {
-            fmt.Println("Token is not valid")
+            fmt.Println("Invalid token:", err)
             http.Error(w, "Invalid token", http.StatusUnauthorized)
-            return
-        }
-
-        claims, ok := token.Claims.(jwt.MapClaims)
-        if !ok || !token.Valid {
-            fmt.Println("Invalid token claims")
-            http.Error(w, "Invalid token claims", http.StatusUnauthorized)
             return
         }
 
@@ -80,10 +55,50 @@ func AuthMiddleware(next http.Handler) http.Handler {
         }
         fmt.Println("admin_id from token:", adminID)
 
-        // Simpan admin_id ke dalam header atau atribut lain yang bisa diakses
         r.Header.Set("admin_id", adminID)
 
-        // Lanjutkan ke handler berikutnya
+
         next.ServeHTTP(w, r)
     })
+}
+
+func validateJWT(tokenString string) (jwt.MapClaims, error) {
+    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+        }
+        return []byte(config.JWTSecret), nil
+    })
+
+    if err != nil {
+        var ve *jwt.ValidationError
+        if errors.As(err, &ve) && ve.Errors&jwt.ValidationErrorExpired != 0 {
+            return nil, jwt.ErrTokenExpired
+        }
+        return nil, err
+    }
+
+    if !token.Valid {
+        return nil, fmt.Errorf("invalid token")
+    }
+
+    claims, ok := token.Claims.(jwt.MapClaims)
+    if !ok {
+        return nil, fmt.Errorf("invalid token claims")
+    }
+
+    return claims, nil
+}
+
+func deleteExpiredToken(tokenString string) {
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    filter := bson.M{"token": tokenString}
+    _, err := config.Mongoconn.Collection("tokens").DeleteOne(ctx, filter)
+    if err != nil {
+        fmt.Printf("Failed to delete expired token: %v\n", err)
+    } else {
+        fmt.Println("Expired token deleted successfully")
+    }
 }

@@ -87,7 +87,16 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	filter := bson.M{"_id": newTempat.ID}
-	update := bson.M{"$set": newTempat}
+	update := bson.M{
+		"$set": bson.M{
+			"nama_tempat": newTempat.Nama_Tempat,
+			"lokasi": newTempat.Lokasi,
+			"fasilitas": newTempat.Fasilitas,
+			"lon": newTempat.Lon,
+			"lat": newTempat.Lat,
+			"gambar": newTempat.Gambar,
+		},
+	}
 	fmt.Println("Filter:", filter)
 	fmt.Println("Update:", update)
 
@@ -102,10 +111,6 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = LogActivity(respw, req)
-	if err != nil {
-		fmt.Println("Failed to log activity:", err)
-	}
 
 	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }
@@ -142,12 +147,6 @@ func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	if deleteResult.DeletedCount == 0 {
 		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Document not found"})
 		return
-	}
-
-	// Log the activity
-	err = LogActivity(respw, req)
-	if err != nil {
-		fmt.Println("Failed to log activity:", err)
 	}
 
 	// Send success response

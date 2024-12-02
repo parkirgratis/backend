@@ -32,10 +32,12 @@ type Token struct {
 }
 
 type Saran struct {
-	ID			primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	Gmail  string                  `bson:"gmail" json:"gmail"`
-	Nama  string                   `bson:"nama" json:"nama"`
-	Saran_User  string             `bson:"saran_user" json:"saran_user"`
+	ID         primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Gmail      string             `bson:"gmail" json:"gmail"`
+	Nama       string             `bson:"nama" json:"nama"`
+	Saran_User string             `bson:"saran_user" json:"saran_user"`
+	Tanggal    time.Time          `bson:"tanggal" json:"tanggal"`
+
 	
 }
 

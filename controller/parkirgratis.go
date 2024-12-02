@@ -87,20 +87,18 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	filter := bson.M{"_id": newTempat.ID}
-	update := bson.M{
-		"$set": bson.M{
-			"nama_tempat": newTempat.Nama_Tempat,
-			"lokasi": newTempat.Lokasi,
-			"fasilitas": newTempat.Fasilitas,
-			"lon": newTempat.Lon,
-			"lat": newTempat.Lat,
-			"gambar": newTempat.Gambar,
-		},
-	}
+	updatefields := bson.M{
+    "nama_tempat": newTempat.Nama_Tempat,
+    "lokasi": newTempat.Lokasi,
+    "fasilitas": newTempat.Fasilitas,
+    "lon": newTempat.Lon,
+    "lat": newTempat.Lat,
+    "gambar": newTempat.Gambar,
+}
 	fmt.Println("Filter:", filter)
-	fmt.Println("Update:", update)
+	fmt.Println("Update:", updatefields)
 
-	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, update)
+	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, updatefields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return

@@ -199,12 +199,22 @@ func InsertManyDocs[T any](db *mongo.Database, collection string, docs []T) (ins
 //		"refresh_token": token.RefreshToken,
 //		"expiry":        token.Expiry,
 //	}
-func UpdateOneDoc(db *mongo.Database, collection string, filter bson.M, updatefields bson.M) (updateresult *mongo.UpdateResult, err error) {
-	updateresult, err = db.Collection(collection).UpdateOne(context.TODO(), filter, bson.M{"$set": updatefields}, options.Update().SetUpsert(true))
-	if err != nil {
-		return
-	}
-	return
+func UpdateOneDoc(db *mongo.Database, collection string, filter bson.M, updatefields bson.M) (*mongo.UpdateResult, error) {
+    if len(updatefields) == 0 {
+        return nil, fmt.Errorf("updatefields cannot be empty")
+    }
+
+    updateresult, err := db.Collection(collection).UpdateOne(
+        context.TODO(),
+        filter,
+        bson.M{"$set": updatefields},
+        options.Update().SetUpsert(true),
+    )
+    if err != nil {
+        return nil, fmt.Errorf("failed to update document: %w", err)
+    }
+
+    return updateresult, nil
 }
 
 // With ReplaceOneDoc() you can only replace the entire document,

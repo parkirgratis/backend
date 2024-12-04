@@ -26,7 +26,7 @@ type Admin struct{
 
 type Token struct {
 	ID			string 				`bson:"_id,omitempty" json:"_id,omitempty"`
-	Token 		string 					`bson:"token,omitempty" json:"token,omitempty"`
+	Token 		string 				`bson:"token,omitempty" json:"token,omitempty"`
 	AdminID		string				`bson:"admin_id,omitempty" json:"admin_id,omitempty"`
 	CreatedAt	time.Time			`bson:"created_at,omitempty" json:"created_at,omitempty"` 
 }
@@ -41,9 +41,9 @@ type Saran struct {
 	
 }
 
-type Activity struct {
-	ID 		  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	UserID   primitive.ObjectID `bson:"admin_id,omitempty" json:"admin_id,omitempty"`
-    Action    string             `bson:"action,omitempty" json:"action,omitempty"`
-    Timestamp time.Time          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
+type LoginLog struct {
+	ID        string    `bson:"_id,omitempty" json:"_id,omitempty"`
+	Username  string    `bson:"username,omitempty" json:"username,omitempty"`
+	Timestamp time.Time `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
+	Status    string    `bson:"status,omitempry" json:"status,omitempty"`
 }

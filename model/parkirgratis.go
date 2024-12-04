@@ -45,5 +45,5 @@ type LoginLog struct {
 	ID        string    `bson:"_id,omitempty" json:"_id,omitempty"`
 	Username  string    `bson:"username,omitempty" json:"username,omitempty"`
 	Timestamp time.Time `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
-	Status    string    `bson:"status,omitempry" json:"status,omitempty"`
+	Activity  string    `bson:"activity,omitempry" json:"activity,omitempty"`
 }

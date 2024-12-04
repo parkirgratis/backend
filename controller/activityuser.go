@@ -9,20 +9,17 @@ import (
     "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func LogActivity(username, activity string) error {
+func LogActivity(username string) error {
     collection := config.Mongoconn.Collection("activity_logs")
     ctx := context.Background()
 
     log := model.LoginLog{
         ID:        primitive.NewObjectID().Hex(),
         Username:  username,
-        Activity:  activity,
+        Activity:  "Login",
         Timestamp: time.Now(),
     }
 
     _, err := collection.InsertOne(ctx, log)
-    if err != nil {
-        return err
-    }
-    return nil
+    return err
 }

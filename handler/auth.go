@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
+	"github.com/gocroot/controller"
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
 	"github.com/gocroot/helper/atdb"
@@ -166,26 +166,22 @@ func Login(respw http.ResponseWriter, req *http.Request) {
     }
 
     var storedAdmin model.Admin
-    // Mencari admin berdasarkan username
     if err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
         helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
         return
     }
 
-    // Memeriksa kecocokan password
     if !config.CheckPasswordHash(loginDetails.Password, storedAdmin.Password) {
         helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
         return
     }
 
-    // Menghasilkan token JWT
     token, err := config.GenerateJWT(storedAdmin.ID.Hex())
     if err != nil {
         helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})
         return
     }
 
-    // Simpan token ke MongoDB
     collection := config.Mongoconn.Collection("tokens")
     ctx := context.Background()
     newToken := model.Token{
@@ -200,7 +196,11 @@ func Login(respw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // Kirim respons berhasil
+    if err := controller.LogActivity(storedAdmin.Username); err != nil {
+        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to log login activity"})
+        return
+    }
+
     helper.WriteJSON(respw, http.StatusOK, map[string]string{
         "status": "Login successful",
         "token":  token,

@@ -12,7 +12,6 @@ import (
 )
 
 func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
-	// Validasi dan decode body menjadi satu struct
 	var locationData model.LocationData
 	if err := json.NewDecoder(req.Body).Decode(&locationData); err != nil || locationData.Latitude == 0 || locationData.Longitude == 0 {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
@@ -20,14 +19,22 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 		})
 		return
 	}
-	
+
+	if locationData.Region.Province == "" || locationData.Region.District == "" ||
+		locationData.Region.SubDistrict == "" || locationData.Region.Village == "" {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Incomplete region data",
+		})
+		return
+	}
+
 	region := model.Region{
 		Province:    locationData.Region.Province,
 		District:    locationData.Region.District,
 		SubDistrict: locationData.Region.SubDistrict,
 		Village:     locationData.Region.Village,
 		Border: model.Location{
-			Type: "Point", 
+			Type: "Point",
 			Coordinates: [][][]float64{
 				{
 					{locationData.Longitude, locationData.Latitude},
@@ -45,10 +52,8 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Beri response sukses
 	at.WriteJSON(respw, http.StatusOK, map[string]interface{}{
 		"status":  "Success",
 		"message": "Region successfully synced and saved to MongoDB",
 	})
 }
-

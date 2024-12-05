@@ -261,7 +261,6 @@ func DashboardAdmin(res http.ResponseWriter, req *http.Request) {
 
 func RegisterAdmin(respw http.ResponseWriter, req *http.Request) {
 	var adminDetails model.Admin
-
 	// Parsing body JSON untuk mendapatkan data admin
 	if err := json.NewDecoder(req.Body).Decode(&adminDetails); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})

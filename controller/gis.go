@@ -13,7 +13,6 @@ import (
 
 func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) {
 	var region model.Region
-
 	if err := json.NewDecoder(req.Body).Decode(&region); err != nil {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Invalid request body",
@@ -29,23 +28,12 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	if region.Longitude == 0 || region.Latitude == 0 {
+	if region.Latitude < -90 || region.Latitude > 90 || 
+	   region.Longitude < -180 || region.Longitude > 180 {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Longitude and Latitude must be provided",
 		})
 		return
-	}
-
-	if len(region.Border.Coordinates) == 0 {
-		region.Border = model.Location{
-			Type:        "Point",
-			Coordinates: [][][]float64{},
-		}
-	}
-
-	longLat := model.LongLat{
-		Longitude: region.Longitude,
-		Latitude:  region.Latitude,
 	}
 
 	_, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
@@ -65,8 +53,8 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 			"district":    region.District,
 			"subDistrict": region.SubDistrict,
 			"village":     region.Village,
-			"longitude":   longLat.Longitude,
-			"latitude":    longLat.Latitude,
+			"longitude":   region.Longitude,
+			"latitude":    region.Latitude,
 		},
 	})
 }

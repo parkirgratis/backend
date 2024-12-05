@@ -86,7 +86,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 
 		//Location Nembak Endpoint
 	case method == "POST" && path == "/data/gis/lokasi":
-		controller.SyncDataWithPetapedia(w, r)
+		controller.InsertDataRegionFromPetapdia(w, r)
 
 	// Rute untuk webhook dengan parameter dinamis.
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):

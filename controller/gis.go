@@ -11,36 +11,41 @@ import (
 	"github.com/gocroot/model"
 )
 
-func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
-	var locationData model.LocationData
-	if err := json.NewDecoder(req.Body).Decode(&locationData); err != nil || locationData.Latitude == 0 || locationData.Longitude == 0 {
+func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) {
+	var region model.Region
+
+	if err := json.NewDecoder(req.Body).Decode(&region); err != nil {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
-			"error": "Invalid latitude or longitude",
+			"error": "Invalid request body",
 		})
 		return
 	}
 
-	if locationData.Region.Province == "" || locationData.Region.District == "" ||
-		locationData.Region.SubDistrict == "" || locationData.Region.Village == "" {
+	if region.Province == "" || region.District == "" ||
+		region.SubDistrict == "" || region.Village == "" {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Incomplete region data",
 		})
 		return
 	}
 
-	region := model.Region{
-		Province:    locationData.Region.Province,
-		District:    locationData.Region.District,
-		SubDistrict: locationData.Region.SubDistrict,
-		Village:     locationData.Region.Village,
-		Border: model.Location{
-			Type: "Point",
-			Coordinates: [][][]float64{
-				{
-					{locationData.Longitude, locationData.Latitude},
-				},
-			},
-		},
+	if region.Longitude == 0 || region.Latitude == 0 {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Longitude and Latitude must be provided",
+		})
+		return
+	}
+
+	if len(region.Border.Coordinates) == 0 {
+		region.Border = model.Location{
+			Type:        "Point",
+			Coordinates: [][][]float64{},
+		}
+	}
+
+	longLat := model.LongLat{
+		Longitude: region.Longitude,
+		Latitude:  region.Latitude,
 	}
 
 	_, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
@@ -54,6 +59,14 @@ func SyncDataWithPetapedia(respw http.ResponseWriter, req *http.Request) {
 
 	at.WriteJSON(respw, http.StatusOK, map[string]interface{}{
 		"status":  "Success",
-		"message": "Region successfully synced and saved to MongoDB",
+		"message": "Region successfully saved to MongoDB",
+		"data": map[string]interface{}{
+			"province":    region.Province,
+			"district":    region.District,
+			"subDistrict": region.SubDistrict,
+			"village":     region.Village,
+			"longitude":   longLat.Longitude,
+			"latitude":    longLat.Latitude,
+		},
 	})
 }

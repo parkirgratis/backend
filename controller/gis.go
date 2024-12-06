@@ -22,11 +22,15 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 
 	if region.Province == "" || region.District == "" ||
 		region.SubDistrict == "" || region.Village == "" || region.Nama_Tempat == "" ||
-		region.Gambar == "" || region.Lokasi == "" {
+		region.Lokasi == "" {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Incomplete region data",
 		})
 		return
+	}
+
+	if region.Gambar != "" {
+		region.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + region.Gambar
 	}
 
 	if region.Lat < -90 || region.Lat > 90 || 

@@ -12,7 +12,7 @@ import (
 )
 
 func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) {
-	var region model.Region
+	var region model.Tempat
 	if err := json.NewDecoder(req.Body).Decode(&region); err != nil {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Invalid request body",
@@ -21,22 +21,23 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 	}
 
 	if region.Province == "" || region.District == "" ||
-		region.SubDistrict == "" || region.Village == "" {
+		region.SubDistrict == "" || region.Village == "" || region.Nama_Tempat == "" ||
+		region.Gambar == "" || region.Lokasi == "" {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Incomplete region data",
 		})
 		return
 	}
 
-	if region.Latitude < -90 || region.Latitude > 90 || 
-	   region.Longitude < -180 || region.Longitude > 180 {
+	if region.Lat < -90 || region.Lat > 90 || 
+	   region.Lon < -180 || region.Lon > 180 {
 		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
 			"error": "Longitude and Latitude must be provided",
 		})
 		return
 	}
 
-	_, err := atdb.InsertOneDoc(config.Mongoconn, "region", region)
+	_, err := atdb.InsertOneDoc(config.Mongoconn, "tempat", region)
 	if err != nil {
 		log.Println("Error saving region to MongoDB:", err)
 		at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{
@@ -53,8 +54,12 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 			"district":    region.District,
 			"subDistrict": region.SubDistrict,
 			"village":     region.Village,
-			"longitude":   region.Longitude,
-			"latitude":    region.Latitude,
+			"longitude":   region.Lon,
+			"latitude":    region.Lat,
+			"namaTempat": region.Nama_Tempat,
+			"lokasi": region.Lokasi,
+			"gambar": region.Gambar,
+			"fasilitas": region.Fasilitas,
 		},
 	})
 }

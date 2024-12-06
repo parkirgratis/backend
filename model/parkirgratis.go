@@ -11,7 +11,11 @@ type Tempat struct {
 	Fasilitas   string             `bson:"fasilitas,omitempty" json:"fasilitas,omitempty"`
 	Lon         float64            `bson:"lon,omitempty" json:"lon,omitempty"`
 	Lat         float64            `bson:"lat,omitempty" json:"lat,omitempty"`
-	Gambar      string            `bson:"gambar,omitempty" json:"gambar,omitempty"`
+	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
+	Province    string             `bson:"province,omitempty" json:"province,omitempty"`
+    District    string             `bson:"district,omitempty" json:"district,omitempty"`
+    SubDistrict string             `bson:"sub_district,omitempty" json:"sub_district,omitempty"`
+    Village     string             `bson:"village,omitempty" json:"village,omitempty"`
 }
 
 type Koordinat struct {

@@ -36,6 +36,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PutTempatParkir(w, r) // Memperbarui data tempat parkir.
 	case method == "DELETE" && path == "/data/tempat":
 		controller.DeleteTempatParkir(w, r) // Menghapus tempat parkir.
+	case method == "POST" && path == "/upload/img":
+		controller.PostUploadGithub(w, r) // Menghapus tempat parkir.
 
 		// Rute untuk mengelola koordinat.
 	case method == "POST" && path == "/koordinat":

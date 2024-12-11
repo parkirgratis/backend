@@ -28,13 +28,12 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		Markers [][]float64        `json:"markers"`
 	}
 
-	// Decode request body
+
 	if err := json.NewDecoder(req.Body).Decode(&updateRequest); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
-	// Default ID jika tidak diberikan
 	id := updateRequest.ID
 	if id.IsZero() {
 		var err error

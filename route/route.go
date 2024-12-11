@@ -39,6 +39,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "POST" && path == "/upload/img":
 		controller.PostUploadGithub(w, r) // Menghapus tempat parkir.
 
+	case method == "POST" && path == "/tempat-parkir":
+		controller.InsertDataRegionFromPetapdia(w, r)
+
 		// Rute untuk mengelola koordinat.
 	case method == "POST" && path == "/koordinat":
 		controller.PostKoordinat(w, r) // Menambahkan koordinat baru.

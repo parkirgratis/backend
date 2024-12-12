@@ -20,8 +20,9 @@ type Tempat struct {
 
 type Koordinat struct {
 	ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Markers [][]float64 `json:"markers"`
+	Markers [][]float64 `json:"markers,omitempty" bson:"markers,omitempty"`
 }
+
 type Admin struct{
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	Username string             `bson:"username,omitempty" json:"username,omitempty"`

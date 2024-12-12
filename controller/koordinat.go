@@ -95,7 +95,6 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		Markers [][]float64        `json:"markers"`
 	}
 
-	// body request
 	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -161,7 +160,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+	id, err := primitive.ObjectIDFromHex("675a8fc579c843c236b0b8bb")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return

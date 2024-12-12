@@ -95,8 +95,6 @@ func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 		Markers [][]float64        `json:"markers"`
 	}
-
-	// body request
 	if err := json.NewDecoder(req.Body).Decode(&deleteRequest); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -112,7 +110,7 @@ func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// Default ID jika kosong
+
 	id := deleteRequest.ID
 	if id.IsZero() {
 		var err error
@@ -125,7 +123,7 @@ func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// Filter MongoDB
+
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$pull": bson.M{

@@ -167,7 +167,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
+	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
 
 	if _, err := atdb.UpdateOneDoc(config.Mongoconn, "marker", filter, update); err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())

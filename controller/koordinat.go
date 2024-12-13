@@ -156,22 +156,23 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	var newKoor model.Koordinat
 	if err := json.NewDecoder(req.Body).Decode(&newKoor); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	id, err := primitive.ObjectIDFromHex("675a8fc579c843c236b0b8bb")
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
+		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid ID format"})
 		return
 	}
 
 	filter := bson.M{"_id": id}
 	update := bson.M{"$push": bson.M{"markers": bson.M{"$each": newKoor.Markers}}}
 
-	if _, err := atdb.UpdateOneDoc(config.Mongoconn, "marker", filter, update); err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+	_, err = atdb.UpdateOneDoc(config.Mongoconn, "marker", filter, update)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-	helper.WriteJSON(respw, http.StatusOK, "Markers updated")
+	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Markers updated"})
 }

@@ -160,7 +160,7 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := primitive.ObjectIDFromHex("675a8fc579c843c236b0b8bb")
+	id, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid ID format"})
 		return

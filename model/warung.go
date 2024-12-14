@@ -12,7 +12,7 @@ type Warung struct {
 	Metode_Pembayaran  []string           `bson:"metode_pembayaran,omitempty" json:"metode_pembayaran,omitempty"`
 	Lon         	   float64            `bson:"lon,omitempty" json:"lon,omitempty"`
 	Lat         	   float64            `bson:"lat,omitempty" json:"lat,omitempty"`
-	Gambar             string             `bson:"foto_pratinjau,omitempty" json:"foto_pratinjau,omitempty"`
+	Foto_pratinjau     string             `bson:"foto_pratinjau,omitempty" json:"foto_pratinjau,omitempty"`
 }
 
 type KoordinatWarung struct {

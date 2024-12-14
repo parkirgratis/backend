@@ -34,8 +34,8 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: err.Error()})
 	}
 
-	if tempatWarung.Gambar != "" {
-		tempatWarung.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + tempatWarung.Gambar
+	if tempatWarung.Foto_pratinjau != "" {
+		tempatWarung.Foto_pratinjau = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + tempatWarung.Foto_pratinjau
 	}
 
 	result, err := config.Mongoconn.Collection("warung").InsertOne(context.Background(), tempatWarung)
@@ -99,7 +99,7 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	"metode_pembayaran": newWarung.Metode_Pembayaran,
     "lon": newWarung.Lon,
     "lat": newWarung.Lat,
-    "gambar": newWarung.Gambar,
+    "foto_pratinjau": newWarung.Foto_pratinjau,
 }
 
 	fmt.Println("Filter:", filter)

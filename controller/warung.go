@@ -105,7 +105,7 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	fmt.Println("Filter:", filter)
 	fmt.Println("Update:", updatefields)
 
-	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, updatefields)
+	result, err := atdb.UpdateOneDoc(config.Mongoconn, "warung", filter, updatefields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return

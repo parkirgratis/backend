@@ -77,54 +77,45 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: "Data warung berhasil dihapus"})
 }
 
-func UpdateTempatWarungById(respw http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("id")
-	if id == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
+func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
+	var newWarung model.Warung
+	if err := json.NewDecoder(req.Body).Decode(&newWarung); err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak valid"})
+	fmt.Println("Decoded document:", newWarung)
+
+	if newWarung.ID.IsZero() {
+		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
 		return
 	}
 
-	var updatedData model.Warung
-	if err := json.NewDecoder(req.Body).Decode(&updatedData); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "Format JSON tidak valid"})
-		return
-	}
-
-	if updatedData.Gambar != "" {
-		updatedData.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + updatedData.Gambar
-	}
-
+	filter := bson.M{"_id": newWarung.ID}
 	updatefields := bson.M{
-		"nama_tempat":       updatedData.Nama_Tempat,
-		"lokasi":            updatedData.Lokasi,
-		"jam_buka":          updatedData.Jam_Buka,
-		"metode_pembayaran": updatedData.Metode_Pembayaran,
-		"lon":               updatedData.Lon,
-		"lat":               updatedData.Lat,
-		"gambar":            updatedData.Gambar,
-	}
-
-	update := bson.M{
-		"$set": updatefields,
-	}
-
-	filter := bson.M{"_id": objectID}
-	result, err := config.Mongoconn.Collection("warung").UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
-		return
-	}
-
-	if result.MatchedCount == 0 {
-		helper.WriteJSON(respw, http.StatusNotFound, itmodel.Response{Response: "Data warung tidak ditemukan"})
-		return
-	}
-
-	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: "Data warung berhasil diperbarui"})
+    "nama_tempat": newWarung.Nama_Tempat,
+    "lokasi": newWarung.Lokasi,
+	"jam_buka": newWarung.Jam_Buka,
+	"metode_pembayaran": newWarung.Metode_Pembayaran,
+    "lon": newWarung.Lon,
+    "lat": newWarung.Lat,
+    "gambar": newWarung.Gambar,
 }
+	fmt.Println("Filter:", filter)
+	fmt.Println("Update:", updatefields)
+
+	result, err := atdb.UpdateOneDoc(config.Mongoconn, "warung", filter, updatefields)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if result.ModifiedCount == 0 {
+		helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
+		return
+	}
+
+
+	helper.WriteJSON(respw, http.StatusOK, newWarung)
+}
+

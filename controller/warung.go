@@ -50,7 +50,7 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("id")
+	id := req.URL.Query().Get("_id")
 	if id == "" {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
 		return
@@ -78,7 +78,7 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateTempatWarungById(respw http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("id")
+	id := req.URL.Query().Get("_id")
 	if id == "" {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
 		return

@@ -84,6 +84,18 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if newWarung.ID.IsZero() ||
+		newWarung.Nama_Tempat == "" ||
+		newWarung.Lokasi == "" ||
+		newWarung.Jam_Buka == "" ||
+		len(newWarung.Metode_Pembayaran) == 0 ||
+		newWarung.Lon == 0 ||
+		newWarung.Lat == 0 ||
+		newWarung.Foto_pratinjau == "" {
+		helper.WriteJSON(respw, http.StatusBadRequest, "All fields must be filled and valid")
+		return
+	}
+
 	fmt.Println("Decoded document:", newWarung)
 	id, err := primitive.ObjectIDFromHex(newWarung.ID.Hex())
 	if err != nil {

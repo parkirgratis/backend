@@ -85,13 +85,13 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Println("Decoded document:", newWarung)
-
-	if newWarung.ID.IsZero() {
-		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
+	id, err := primitive.ObjectIDFromHex(newWarung.ID.Hex())
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
-	filter := bson.M{"_id": newWarung.ID}
+	filter := bson.M{"_id": id}
 	updatefields := bson.M{
     "nama_tempat": newWarung.Nama_Tempat,
     "lokasi": newWarung.Lokasi,

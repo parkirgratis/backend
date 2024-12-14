@@ -50,7 +50,7 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("id")
+	id := req.URL.Query().Get("_id")
 	if id == "" {
 		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
 		return
@@ -77,10 +77,17 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: "Data warung berhasil dihapus"})
 }
 
+<<<<<<< HEAD
 func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	var newWarung model.Warung
 	if err := json.NewDecoder(req.Body).Decode(&newWarung); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+=======
+func UpdateTempatWarungById(respw http.ResponseWriter, req *http.Request) {
+	id := req.URL.Query().Get("_id")
+	if id == "" {
+		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
+>>>>>>> 353d6830e6e2963eb70d2d179769c8a55eee391f
 		return
 	}
 

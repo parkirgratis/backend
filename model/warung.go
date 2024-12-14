@@ -5,7 +5,7 @@ import (
 )
 
 type Warung struct {
-	ID                 primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	ID                 primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Nama_Tempat        string             `bson:"nama_tempat,omitempty" json:"nama_tempat,omitempty"`
 	Lokasi             string             `bson:"lokasi,omitempty" json:"lokasi,omitempty"`
 	Jam_Buka           string             `bson:"jam_buka,omitempty" json:"jam_buka,omitempty"`

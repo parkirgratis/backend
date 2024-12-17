@@ -67,3 +67,60 @@ func InsertDataRegionFromPetapdia(respw http.ResponseWriter, req *http.Request) 
 		},
 	})
 }
+
+func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Request) {
+	var region model.Warung
+	if err := json.NewDecoder(req.Body).Decode(&region); err != nil {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Invalid request body",
+		})
+		return
+	}
+
+	if region.Province == "" || region.District == "" ||
+		region.SubDistrict == "" || region.Village == "" || region.Nama_Tempat == "" ||
+		region.Lokasi == "" {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Incomplete region data",
+		})
+		return
+	}
+
+	if region.Foto_pratinjau != "" {
+		region.Foto_pratinjau = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + region.Foto_pratinjau
+	}
+
+	if region.Lat < -90 || region.Lat > 90 || 
+	   region.Lon < -180 || region.Lon > 180 {
+		at.WriteJSON(respw, http.StatusBadRequest, map[string]string{
+			"error": "Longitude and Latitude must be provided",
+		})
+		return
+	}
+
+	_, err := atdb.InsertOneDoc(config.Mongoconn, "warung", region)
+	if err != nil {
+		log.Println("Error saving region to MongoDB:", err)
+		at.WriteJSON(respw, http.StatusInternalServerError, map[string]string{
+			"error": "Failed to save region to MongoDB",
+		})
+		return
+	}
+
+	at.WriteJSON(respw, http.StatusOK, map[string]interface{}{
+		"status":  "Success",
+		"message": "Region successfully saved to MongoDB",
+		"data": map[string]interface{}{
+			"province":    region.Province,
+			"district":    region.District,
+			"subDistrict": region.SubDistrict,
+			"village":     region.Village,
+			"longitude":   region.Lon,
+			"latitude":    region.Lat,
+			"namaTempat": region.Nama_Tempat,
+			"lokasi": region.Lokasi,
+			"gambar": region.Foto_pratinjau,
+			"fasilitas": region.Foto_pratinjau,
+		},
+	})
+}

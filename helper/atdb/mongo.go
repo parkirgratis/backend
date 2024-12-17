@@ -207,7 +207,7 @@ func UpdateOneDoc(db *mongo.Database, collection string, filter bson.M, update b
     updateresult, err := db.Collection(collection).UpdateOne(
         context.TODO(),
         filter,
-        update, 
+        bson.M{"$set": update},
         options.Update().SetUpsert(true),
     )
     if err != nil {

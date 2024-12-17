@@ -217,6 +217,24 @@ func UpdateOneDoc(db *mongo.Database, collection string, filter bson.M, update b
     return updateresult, nil
 }
 
+func UpdateOneArray(db *mongo.Database, collection string, filter bson.M, update bson.M) (*mongo.UpdateResult, error) {
+    if len(update) == 0 {
+        return nil, fmt.Errorf("update cannot be empty")
+    }
+
+    updateresult, err := db.Collection(collection).UpdateOne(
+        context.TODO(),
+        filter,
+        update, 
+        options.Update().SetUpsert(true),
+    )
+    if err != nil {
+        return nil, fmt.Errorf("failed to update document: %w", err)
+    }
+
+    return updateresult, nil
+}
+
 
 // With ReplaceOneDoc() you can only replace the entire document,
 // while UpdateOneDoc() allows for updating fields. Since ReplaceOneDoc() replaces the entire document - fields in the old document not contained in the new will be lost.

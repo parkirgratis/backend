@@ -120,7 +120,7 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 			"namaTempat": region.Nama_Tempat,
 			"lokasi": region.Lokasi,
 			"gambar": region.Foto_pratinjau,
-			"fasilitas": region.Foto_pratinjau,
+			"metodePembayaran": region.Metode_Pembayaran,
 		},
 	})
 }

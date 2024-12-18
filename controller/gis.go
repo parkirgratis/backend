@@ -86,8 +86,8 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 		return
 	}
 
-	if region.Foto_pratinjau != "" {
-		region.Foto_pratinjau = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + region.Foto_pratinjau
+	if region.Gambar != "" {
+		region.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + region.Gambar
 	}
 
 	if region.Lat < -90 || region.Lat > 90 || 
@@ -119,7 +119,7 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 			"latitude":    region.Lat,
 			"namaTempat": region.Nama_Tempat,
 			"lokasi": region.Lokasi,
-			"gambar": region.Foto_pratinjau,
+			"gambar": region.Gambar,
 			"metodePembayaran": region.Metode_Pembayaran,
 		},
 	})

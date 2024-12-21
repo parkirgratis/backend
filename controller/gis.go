@@ -101,6 +101,7 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 	})
 }
 
+//GetRoads
 func GetRoads(respw http.ResponseWriter, req *http.Request) {
 	var longlat model.LongLat
 	err := json.NewDecoder(req.Body).Decode(&longlat)

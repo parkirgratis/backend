@@ -96,6 +96,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.InsertDataRegionFromPetapdiaWarung(w, r)
 	case method == "POST" && path == "/data/gis/jalan":
 		controller.GetRoads(w, r)
+	case method == "POST" && path == "/data/gis/region":
+		controller.GetRegion(w, r)
 
 	// Rute untuk webhook dengan parameter dinamis.
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):

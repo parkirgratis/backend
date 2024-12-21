@@ -111,7 +111,7 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	"metode_pembayaran": newWarung.Metode_Pembayaran,
     "lon": newWarung.Lon,
     "lat": newWarung.Lat,
-    "foto_pratinjau": newWarung.Gambar,
+    "gambar": newWarung.Gambar,
 }
 
 	fmt.Println("Filter:", filter)

@@ -115,7 +115,6 @@ func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		ID string `json:"id"`
 	}
 
-	// Decode JSON request body
 	if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid JSON data"})
 		return
@@ -131,19 +130,18 @@ func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	// Create filter
 	filter := bson.M{"_id": objectId}
 
-	// Delete the document
 	deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "tempat", filter)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete document", "error": err.Error()})
 		return
 	}
 
-	// Check if any document was deleted
+
 	if deleteResult.DeletedCount == 0 {
 		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Document not found"})
 		return
 	}
 
-	// Send success response
+	
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Document deleted successfully"})
 }

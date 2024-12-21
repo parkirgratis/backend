@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"github.com/gocroot/helper/watoken"
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper/at"
 	"github.com/gocroot/helper/atdb"
@@ -103,24 +102,16 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 }
 
 func GetRoads(respw http.ResponseWriter, req *http.Request) {
-	_, err := watoken.Decode(config.PublicKeyWhatsAuth, at.GetLoginFromHeader(req))
-	if err != nil {
-		var respn model.Response
-		respn.Status = "Error : Token Tidak Valid "
-		respn.Location = "Decode Token Error: " + at.GetLoginFromHeader(req)
-		respn.Response = err.Error()
-		at.WriteJSON(respw, http.StatusForbidden, respn)
-		return
-	}
 	var longlat model.LongLat
-	err = json.NewDecoder(req.Body).Decode(&longlat)
+	err := json.NewDecoder(req.Body).Decode(&longlat)
 	if err != nil {
 		var respn model.Response
-		respn.Status = "Error : Body tidak valid"
+		respn.Status = "Error: Body tidak valid"
 		respn.Response = err.Error()
 		at.WriteJSON(respw, http.StatusBadRequest, respn)
 		return
 	}
+	
 	filter := bson.M{
 		"geometry": bson.M{
 			"$near": bson.M{
@@ -132,10 +123,16 @@ func GetRoads(respw http.ResponseWriter, req *http.Request) {
 			},
 		},
 	}
-	roads, err := atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", filter)
+
+	var roads []model.Roads
+	roads, err = atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", filter)
 	if err != nil {
-		at.WriteJSON(respw, http.StatusNotFound, roads)
+		var respn model.Response
+		respn.Status = "Error: Tidak ada data ditemukan"
+		respn.Response = err.Error()
+		at.WriteJSON(respw, http.StatusNotFound, respn)
 		return
 	}
+	
 	at.WriteJSON(respw, http.StatusOK, roads)
 }

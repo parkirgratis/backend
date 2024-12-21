@@ -101,7 +101,7 @@ func InsertDataRegionFromPetapdiaWarung(respw http.ResponseWriter, req *http.Req
 	})
 }
 
-//GetRoads
+
 func GetRoads(respw http.ResponseWriter, req *http.Request) {
 	var longlat model.LongLat
 	err := json.NewDecoder(req.Body).Decode(&longlat)
@@ -115,12 +115,12 @@ func GetRoads(respw http.ResponseWriter, req *http.Request) {
 	
 	filter := bson.M{
 		"geometry": bson.M{
-			"$near": bson.M{
-				"$geometry": bson.M{
-					"type":        "Point",
+			"$nearSphere": bson.M{ 
+				"$geometry": bson.M{ 
+					"type":        "Point", 
 					"coordinates": []float64{longlat.Longitude, longlat.Latitude},
 				},
-				"$maxDistance": 600,
+				"$maxDistance": longlat.MaxDistance,
 			},
 		},
 	}
@@ -172,3 +172,4 @@ func GetRegion(respw http.ResponseWriter, req *http.Request) {
 
 	at.WriteJSON(respw, http.StatusOK, region)
 }
+

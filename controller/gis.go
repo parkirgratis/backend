@@ -125,7 +125,7 @@ func GetRoads(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	var roads []model.Roads
-	roads, err = atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "jalan", filter)
+	roads, err = atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", filter)
 	if err != nil {
 		var respn model.Response
 		respn.Status = "Error: Tidak ada data ditemukan"

@@ -136,3 +136,38 @@ func GetRoads(respw http.ResponseWriter, req *http.Request) {
 	
 	at.WriteJSON(respw, http.StatusOK, roads)
 }
+
+func GetRegion(respw http.ResponseWriter, req *http.Request) {
+	var longlat model.LongLat
+	err := json.NewDecoder(req.Body).Decode(&longlat)
+	if err != nil {
+		var respn model.Response
+		respn.Status = "Error: Body tidak valid"
+		respn.Response = err.Error()
+		at.WriteJSON(respw, http.StatusBadRequest, respn)
+		return
+	}
+
+	filter := bson.M{
+		"border": bson.M{
+			"$geoIntersects": bson.M{
+				"$geometry": bson.M{
+					"type":        "Point",
+					"coordinates": []float64{longlat.Longitude, longlat.Latitude},
+				},
+			},
+		},
+	}
+
+	var region model.Region
+	region, err = atdb.GetOneDoc[model.Region](config.Mongoconn, "region", filter)
+	if err != nil {
+		var respn model.Response
+		respn.Status = "Error: Region tidak ditemukan"
+		respn.Response = err.Error()
+		at.WriteJSON(respw, http.StatusNotFound, respn)
+		return
+	}
+
+	at.WriteJSON(respw, http.StatusOK, region)
+}

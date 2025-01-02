@@ -75,24 +75,24 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println("Decoded document:", newTempat)
-
 	if newTempat.ID.IsZero() {
 		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
 		return
 	}
 
+	if newTempat.Gambar != "" {
+		newTempat.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + newTempat.Gambar
+	}
+
 	filter := bson.M{"_id": newTempat.ID}
 	updatefields := bson.M{
-    "nama_tempat": newTempat.Nama_Tempat,
-    "lokasi": newTempat.Lokasi,
-    "fasilitas": newTempat.Fasilitas,
-    "lon": newTempat.Lon,
-    "lat": newTempat.Lat,
-    "gambar": newTempat.Gambar,
-}
-	fmt.Println("Filter:", filter)
-	fmt.Println("Update:", updatefields)
+		"nama_tempat": newTempat.Nama_Tempat,
+		"lokasi":      newTempat.Lokasi,
+		"fasilitas":   newTempat.Fasilitas,
+		"lon":         newTempat.Lon,
+		"lat":         newTempat.Lat,
+		"gambar":      newTempat.Gambar,
+	}
 
 	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, updatefields)
 	if err != nil {
@@ -104,7 +104,6 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
 		return
 	}
-
 
 	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }

@@ -37,7 +37,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/tempat":
 		controller.DeleteTempatParkir(w, r) // Menghapus tempat parkir.
 	case method == "POST" && path == "/upload/img":
-		controller.PostUploadGithub(w, r) // Menghapus tempat parkir.
+		controller.PostUploadGithub(w, r) 
 
 	case method == "POST" && path == "/tempat-parkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
@@ -72,7 +72,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmin)).ServeHTTP(w, r)
 
 		// Rute untuk fitur Warung.
-	case method == "POST" && path == "/data/warung":
+	case method == "POST" && path == "/data/tempat-warung":
 		controller.PostTempatWarung(w, r) // Menambahkan data warung.
 	case method == "GET" && path == "/data/warung":
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.

@@ -86,7 +86,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PutKoordinatWarung(w, r)
 	case method == "DELETE" && path == "/data/markerwarung":
 		controller.DeleteKoordinatWarung(w, r)
-	case method == "POST" && path == "/data/markerwarung":
+	case method == "POST" && path == "/data/marker-warung":
 		controller.PostKoordinatWarung(w, r)
 
 		//Location Nembak Endpoint Dari Petapedia

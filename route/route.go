@@ -145,6 +145,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "POST" && at.URLParam(path, "/data/user/wa/:nomorwa"):
 		controller.PostDataUserFromWA(w, r)
 
+	case method == "POST" && helper.URLParam(path, "/upload/:path"):
+        controller.PostUploadGithub(w, r)
+
 	// Rute default untuk request yang tidak dikenali.
 	default:
 		controller.NotFound(w, r) // Mengembalikan response 404 jika rute tidak ditemukan.

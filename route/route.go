@@ -53,7 +53,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		// Rute untuk mengelola saran.
 	case method == "GET" && path == "/data/saran":
 		controller.GetSaran(w, r) // Mendapatkan daftar saran.
-	case method == "POST" && path == "/data/saran":
+	case method == "POST" && path == "/data/datasaran":
 		controller.PostSaran(w, r) // Menambahkan saran baru.
 	case method == "PUT" && path == "/data/saran":
 		controller.PutSaran(w, r) // Memperbarui data saran.

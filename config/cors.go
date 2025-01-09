@@ -13,6 +13,8 @@ var AllowedOrigins = []string{
 	"http://127.0.0.1:5500",
 	"http://127.0.0.1:5501",
 	"https://rayfanaqbil.github.io",
+	"https://hrisz.github.io/",
+	"https://jul003.github.io",
 }
 
 var AllowedHeaders = []string{

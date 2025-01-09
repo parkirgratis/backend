@@ -264,3 +264,13 @@ func GetFilteredDocs[T any](db *mongo.Database, collection string, filter bson.M
 func FindOne(ctx context.Context, collection *mongo.Collection, filter bson.M, result interface{}) error {
 	return collection.FindOne(ctx, filter).Decode(result)
 }
+
+func FindOneDoc(db *mongo.Database, collection string, filter bson.M) *mongo.SingleResult {
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    coll := db.Collection(collection)
+
+    result := coll.FindOne(ctx, filter)
+    return result
+}

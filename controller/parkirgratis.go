@@ -146,7 +146,7 @@ func PostTempatParkir(respw http.ResponseWriter, req *http.Request) {
 			return
 		}
 	
-		// Remove the coordinates from markers
+
 		filter := bson.M{"_id": primitive.ObjectIDFromHex("669510e39590720071a5691d")}
 		update := bson.M{
 			"$pull": bson.M{

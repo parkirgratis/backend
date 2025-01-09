@@ -60,7 +60,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/saran":
 		controller.DeleteSaran(w, r) // Menghapus data saran.
 
-		// Rute untuk admin (login, logout, register, dashboard, aktivitas).
+	// Rute untuk admin (login, logout, register, dashboard, aktivitas).
 	case method == "POST" && path == "/admin/login":
 		handler.Login(w, r) // Login admin.
 	case method == "POST" && path == "/admin/logout":

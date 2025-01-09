@@ -50,32 +50,63 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("_id")
-	if id == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak ditemukan dalam permintaan"})
-		return
+	var requestBody struct {
+		ID string `json:"id"`
 	}
 
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, itmodel.Response{Response: "ID tidak valid"})
-		return
+		if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
+			helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid JSON data"})
+			return
+		}
+	
+		
+		objectId, err := primitive.ObjectIDFromHex(requestBody.ID)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid ID format"})
+			return
+		}
+	
+	
+		var tempat model.Warung
+		err = atdb.FindOneDoc(config.Mongoconn, "warung", bson.M{"_id": objectId}).Decode(&tempat)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Tempat warung not found"})
+			return
+		}
+	
+	
+		deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "warung", bson.M{"_id": objectId})
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete document", "error": err.Error()})
+			return
+		}
+	
+		if deleteResult.DeletedCount == 0 {
+			helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Document not found"})
+			return
+		}
+	
+		markerId, err := primitive.ObjectIDFromHex("67488d0a8589c79bf4ff6d77")
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
+			return
+		}
+	
+		filter := bson.M{"_id": markerId}
+		update := bson.M{
+			"$pull": bson.M{
+				"markers": []float64{tempat.Lon, tempat.Lat},
+			},
+		}
+	
+		_, err = atdb.UpdateOneArray(config.Mongoconn, "marker_warung", filter, update)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to update markers", "error": err.Error()})
+			return
+		}
+	
+		helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Tempat Warung and markers deleted successfully"})
 	}
-
-	filter := bson.M{"_id": objectID}
-	result, err := config.Mongoconn.Collection("warung").DeleteOne(context.Background(), filter)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
-		return
-	}
-
-	if result.DeletedCount == 0 {
-		helper.WriteJSON(respw, http.StatusNotFound, itmodel.Response{Response: "Data warung tidak ditemukan"})
-		return
-	}
-
-	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: "Data warung berhasil dihapus"})
-}
 
 func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	var newWarung model.Warung

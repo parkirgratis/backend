@@ -107,7 +107,7 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }
 
-//fungsi delete parkir dan marker
+//Delete
 func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	var requestBody struct {
 		ID string `json:"id"`

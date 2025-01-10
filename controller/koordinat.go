@@ -131,7 +131,7 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	// Update dokumen
+	
 	result, err := atdb.UpdateOneArray(config.Mongoconn, "marker", filter, update)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": err.Error()})

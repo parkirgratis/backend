@@ -121,7 +121,6 @@ func DeleteKoordinat(respw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// Filter MongoDB
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$pull": bson.M{

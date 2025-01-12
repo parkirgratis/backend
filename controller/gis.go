@@ -173,3 +173,70 @@ func GetRegion(respw http.ResponseWriter, req *http.Request) {
 	at.WriteJSON(respw, http.StatusOK, region)
 }
 
+func SearchRoadsRegion(respw http.ResponseWriter, req *http.Request) {
+	queryParams := req.URL.Query()
+	searchType := queryParams.Get("type") 
+	searchText := queryParams.Get("query")
+
+	if searchType == "" || searchText == "" {
+		var respn model.Response
+		respn.Status = "Error: Parameter 'type' dan 'query' wajib diisi"
+		respn.Response = "Parameter 'type' dan 'query' tidak boleh kosong"
+		at.WriteJSON(respw, http.StatusBadRequest, respn)
+		return
+	}
+
+	var filter bson.M
+	var result interface{}
+
+	switch searchType {
+	case "roads":
+		filter = bson.M{
+			"$or": []bson.M{
+				{"properties.name": bson.M{"$regex": searchText, "$options": "i"}},
+				{"properties.highway": bson.M{"$regex": searchText, "$options": "i"}},
+			},
+		}
+		var roads []model.Roads
+		roads, err := atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", filter)
+		if err != nil {
+			var respn model.Response
+			respn.Status = "Error: Data jalan tidak ditemukan"
+			respn.Response = err.Error()
+			at.WriteJSON(respw, http.StatusNotFound, respn)
+			return
+		}
+		result = roads
+
+	case "region":
+		filter = bson.M{
+			"$or": []bson.M{
+				{"province": bson.M{"$regex": searchText, "$options": "i"}},
+				{"district": bson.M{"$regex": searchText, "$options": "i"}},
+				{"sub_district": bson.M{"$regex": searchText, "$options": "i"}},
+				{"village": bson.M{"$regex": searchText, "$options": "i"}},
+			},
+		}
+		var regions []model.Region
+		regions, err := atdb.GetAllDoc[[]model.Region](config.Mongoconn, "region", filter)
+		if err != nil {
+			var respn model.Response
+			respn.Status = "Error: Data region tidak ditemukan"
+			respn.Response = err.Error()
+			at.WriteJSON(respw, http.StatusNotFound, respn)
+			return
+		}
+		result = regions
+
+	default:
+		var respn model.Response
+		respn.Status = "Error: Tipe pencarian tidak valid"
+		respn.Response = "Gunakan 'roads' atau 'region' sebagai tipe pencarian"
+		at.WriteJSON(respw, http.StatusBadRequest, respn)
+		return
+	}
+
+	at.WriteJSON(respw, http.StatusOK, result)
+}
+
+

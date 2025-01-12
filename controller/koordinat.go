@@ -173,3 +173,4 @@ func PostKoordinat(respw http.ResponseWriter, req *http.Request) {
 	}
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Markers updated"})
 }
+

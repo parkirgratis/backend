@@ -98,6 +98,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetRoads(w, r)
 	case method == "POST" && path == "/data/gis/region":
 		controller.GetRegion(w, r)
+	case method == "GET" && path == "/search/location":
+		controller.SearchRoadsRegion(w, r)
+
 
 	// Rute untuk webhook dengan parameter dinamis.
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):

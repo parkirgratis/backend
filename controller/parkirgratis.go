@@ -78,7 +78,10 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusBadRequest, "ID is required")
 		return
 	}
-
+	if newTempat.Nama_Tempat == "" || newTempat.Lokasi == "" || newTempat.Fasilitas == "" || newTempat.Lon == 0 || newTempat.Lat == 0 {
+		helper.WriteJSON(respw, http.StatusBadRequest, "Nama tempat, Lokasi, Fasilitas, Longitude, and Latitude are required")
+		return
+	}
 	if newTempat.Gambar != "" {
 		newTempat.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + newTempat.Gambar
 	}
@@ -93,7 +96,7 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		"gambar":      newTempat.Gambar,
 	}
 
-	// Retrieve the existing document to update markers if location changes
+
 	var existingTempat model.Tempat
 	err := atdb.FindOneDoc(config.Mongoconn, "tempat", filter).Decode(&existingTempat)
 	if err != nil {
@@ -101,7 +104,7 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Update the document
+	
 	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, updatefields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())

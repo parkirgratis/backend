@@ -238,5 +238,3 @@ func SearchRoadsRegion(respw http.ResponseWriter, req *http.Request) {
 
 	at.WriteJSON(respw, http.StatusOK, result)
 }
-
-

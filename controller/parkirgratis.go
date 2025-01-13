@@ -93,6 +93,15 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		"gambar":      newTempat.Gambar,
 	}
 
+	// Retrieve the existing document to update markers if location changes
+	var existingTempat model.Tempat
+	err := atdb.FindOneDoc(config.Mongoconn, "tempat", filter).Decode(&existingTempat)
+	if err != nil {
+		helper.WriteJSON(respw, http.StatusNotFound, "Tempat not found")
+		return
+	}
+
+	// Update the document
 	result, err := atdb.UpdateOneDoc(config.Mongoconn, "tempat", filter, updatefields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
@@ -104,10 +113,45 @@ func PutTempatParkir(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+
+	if existingTempat.Lon != newTempat.Lon || existingTempat.Lat != newTempat.Lat {
+		markerId, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
+			return
+		}
+
+		filterMarker := bson.M{"_id": markerId}
+
+		
+		pullUpdate := bson.M{
+			"$pull": bson.M{
+				"markers": []float64{existingTempat.Lon, existingTempat.Lat},
+			},
+		}
+		_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", filterMarker, pullUpdate)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to remove old marker", "error": err.Error()})
+			return
+		}
+
+		
+		pushUpdate := bson.M{
+			"$push": bson.M{
+				"markers": []float64{newTempat.Lon, newTempat.Lat},
+			},
+		}
+		_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", filterMarker, pushUpdate)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to add new marker", "error": err.Error()})
+			return
+		}
+	}
+
 	helper.WriteJSON(respw, http.StatusOK, newTempat)
 }
 
-//Delete
+
 func DeleteTempatParkir(respw http.ResponseWriter, req *http.Request) {
 	var requestBody struct {
 		ID string `json:"id"`

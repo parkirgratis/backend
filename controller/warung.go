@@ -108,57 +108,100 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Tempat Warung and markers deleted successfully"})
 	}
 
-func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
-	var newWarung model.Warung
-	if err := json.NewDecoder(req.Body).Decode(&newWarung); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
-		return
+	func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
+		var newWarung model.Warung
+		if err := json.NewDecoder(req.Body).Decode(&newWarung); err != nil {
+			helper.WriteJSON(respw, http.StatusBadRequest, err.Error())
+			return
+		}
+	
+		if newWarung.ID.IsZero() ||
+			newWarung.Nama_Tempat == "" ||
+			newWarung.Lokasi == "" ||
+			newWarung.Jam_Buka == "" ||
+			len(newWarung.Metode_Pembayaran) == 0 ||
+			newWarung.Lon == 0 ||
+			newWarung.Lat == 0 ||
+			newWarung.Gambar == "" {
+			helper.WriteJSON(respw, http.StatusBadRequest, "All fields must be filled and valid")
+			return
+		}
+	
+		fmt.Println("Decoded document:", newWarung)
+		id, err := primitive.ObjectIDFromHex(newWarung.ID.Hex())
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
+			return
+		}
+	
+		filter := bson.M{"_id": id}
+		updatefields := bson.M{
+			"nama_tempat":       newWarung.Nama_Tempat,
+			"lokasi":            newWarung.Lokasi,
+			"jam_buka":          newWarung.Jam_Buka,
+			"metode_pembayaran": newWarung.Metode_Pembayaran,
+			"lon":               newWarung.Lon,
+			"lat":               newWarung.Lat,
+			"gambar":            newWarung.Gambar,
+		}
+	
+		fmt.Println("Filter:", filter)
+		fmt.Println("Update:", updatefields)
+	
+		// Retrieve the existing document to update markers if location changes
+		var existingWarung model.Warung
+		err = atdb.FindOneDoc(config.Mongoconn, "warung", filter).Decode(&existingWarung)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusNotFound, "Warung not found")
+			return
+		}
+	
+		// Update the document
+		result, err := atdb.UpdateOneDoc(config.Mongoconn, "warung", filter, updatefields)
+		if err != nil {
+			helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
+			return
+		}
+	
+		if result.ModifiedCount == 0 {
+			helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
+			return
+		}
+	
+		// Update markers if location changes
+		if existingWarung.Lon != newWarung.Lon || existingWarung.Lat != newWarung.Lat {
+			markerId, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
+			if err != nil {
+				helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
+				return
+			}
+	
+			filterMarker := bson.M{"_id": markerId}
+	
+			// Remove old marker
+			pullUpdate := bson.M{
+				"$pull": bson.M{
+					"markers": []float64{existingWarung.Lon, existingWarung.Lat},
+				},
+			}
+			_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", filterMarker, pullUpdate)
+			if err != nil {
+				helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to remove old marker", "error": err.Error()})
+				return
+			}
+	
+			// Add new marker
+			pushUpdate := bson.M{
+				"$push": bson.M{
+					"markers": []float64{newWarung.Lon, newWarung.Lat},
+				},
+			}
+			_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", pushUpdate, pushUpdate)
+			if err != nil {
+				helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to add new marker", "error": err.Error()})
+				return
+			}
+		}
+	
+		helper.WriteJSON(respw, http.StatusOK, newWarung)
 	}
-
-	if newWarung.ID.IsZero() ||
-		newWarung.Nama_Tempat == "" ||
-		newWarung.Lokasi == "" ||
-		newWarung.Jam_Buka == "" ||
-		len(newWarung.Metode_Pembayaran) == 0 ||
-		newWarung.Lon == 0 ||
-		newWarung.Lat == 0 ||
-		newWarung.Gambar == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, "All fields must be filled and valid")
-		return
-	}
-
-	fmt.Println("Decoded document:", newWarung)
-	id, err := primitive.ObjectIDFromHex(newWarung.ID.Hex())
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, "Invalid ID format")
-		return
-	}
-
-	filter := bson.M{"_id": id}
-	updatefields := bson.M{
-    "nama_tempat": newWarung.Nama_Tempat,
-    "lokasi": newWarung.Lokasi,
-	"jam_buka": newWarung.Jam_Buka,
-	"metode_pembayaran": newWarung.Metode_Pembayaran,
-    "lon": newWarung.Lon,
-    "lat": newWarung.Lat,
-    "gambar": newWarung.Gambar,
-}
-
-	fmt.Println("Filter:", filter)
-	fmt.Println("Update:", updatefields)
-
-	result, err := atdb.UpdateOneDoc(config.Mongoconn, "warung", filter, updatefields)
-	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if result.ModifiedCount == 0 {
-		helper.WriteJSON(respw, http.StatusNotFound, "Document not found or not modified")
-		return
-	}
-
-
-	helper.WriteJSON(respw, http.StatusOK, newWarung)
-}

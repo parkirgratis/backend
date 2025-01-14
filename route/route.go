@@ -41,6 +41,11 @@ func URL(w http.ResponseWriter, r *http.Request) {
 
 	case method == "POST" && path == "/tempat-parkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
+	case method == "GET" && path == "/data/region":
+		controller.GetRegionData(w, r)
+	case method == "GET" && path == "/data/roads":
+		controller.GetRoadsData(w, r)
+
 
 		// Rute untuk mengelola koordinat.
 	case method == "POST" && path == "/koordinat":

@@ -41,10 +41,6 @@ func URL(w http.ResponseWriter, r *http.Request) {
 
 	case method == "POST" && path == "/tempat-parkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
-	case method == "GET" && path == "/data/roads":
-		controller.GetRoadsAsGeoJSON(w, r)
-	case method == "GET" && path == "/data/region":
-		controller.GetRegionsAsGeoJSON(w, r)
 
 
 		// Rute untuk mengelola koordinat.
@@ -103,8 +99,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetRoads(w, r)
 	case method == "POST" && path == "/data/gis/region":
 		controller.GetRegion(w, r)
-	case method == "GET" && path == "/search/location":
-		controller.SearchRoadsRegion(w, r)
+	
 
 
 	// Rute untuk webhook dengan parameter dinamis.

@@ -273,3 +273,37 @@ func GetRegionsAsGeoJSON(respw http.ResponseWriter, req *http.Request) {
     // Mengirimkan GeoJSON ke frontend
     helper.WriteJSON(respw, http.StatusOK, geoJSON)
 }
+
+func GetRoadsAsGeoJSON(respw http.ResponseWriter, req *http.Request) {
+    roads, err := atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", bson.M{})
+    if err != nil {
+        respw.WriteHeader(http.StatusInternalServerError)
+        respw.Write([]byte(`{"error": "Failed to fetch roads"}`))
+        return
+    }
+
+    // Membuat fitur GeoJSON untuk setiap road
+    features := make([]model.GeoJSONFitur, 0)
+    for _, road := range roads {
+        feature := model.GeoJSONFitur{
+            Type: "Feature",
+            Geometry: map[string]interface{}{
+                "type":        "LineString",
+                "coordinates": road.Geometry.Coordinates,
+            },
+            Properties: map[string]interface{}{
+                "name": road.Properties.Name,
+            },
+        }
+        features = append(features, feature)
+    }
+
+    // Membuat GeoJSON
+    geoJSON := model.GeoJSON{
+        Type:     "FeatureCollection",
+        Features: features,
+    }
+
+    // Mengirimkan GeoJSON ke frontend
+    helper.WriteJSON(respw, http.StatusOK, geoJSON)
+}

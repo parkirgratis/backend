@@ -8,6 +8,8 @@ import (
 	"github.com/gocroot/helper/at"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
+	"github.com/whatsauth/itmodel"
+	"github.com/gocroot/helper"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -237,4 +239,16 @@ func SearchRoadsRegion(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	at.WriteJSON(respw, http.StatusOK, result)
+}
+
+func GetRegionData(respw http.ResponseWriter, req *http.Request){
+	var resp itmodel.Response
+	regi, err := atdb.GetAllDoc[[]model.Region](config.Mongoconn, "region", bson.M{})
+	if err != nil {
+		resp.Response = err.Error()
+		helper.WriteJSON(respw, http.StatusBadRequest, resp)
+		return
+	}
+	helper.WriteJSON(respw, http.StatusOK, regi)
+
 }

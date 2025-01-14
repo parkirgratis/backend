@@ -240,27 +240,3 @@ func SearchRoadsRegion(respw http.ResponseWriter, req *http.Request) {
 
 	at.WriteJSON(respw, http.StatusOK, result)
 }
-
-func GetRegionData(respw http.ResponseWriter, req *http.Request){
-	var resp itmodel.Response
-	regi, err := atdb.GetAllDoc[[]model.Region](config.Mongoconn, "region", bson.M{})
-	if err != nil {
-		resp.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusBadRequest, resp)
-		return
-	}
-	helper.WriteJSON(respw, http.StatusOK, regi)
-
-}
-
-func GetRoadsData(respw http.ResponseWriter, req *http.Request){
-	var resp itmodel.Response
-	regi, err := atdb.GetAllDoc[[]model.Roads](config.Mongoconn, "roads", bson.M{})
-	if err != nil {
-		resp.Response = err.Error()
-		helper.WriteJSON(respw, http.StatusBadRequest, resp)
-		return
-	}
-	helper.WriteJSON(respw, http.StatusOK, regi)
-
-}

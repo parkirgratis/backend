@@ -35,3 +35,15 @@ type Properties struct {
 	Name    string `bson:"name" json:"name"`
 	Highway string `bson:"highway" json:"highway"`
 }
+
+type GeoJSONFitur struct {
+    Type       string                 `json:"type"`
+    Geometry   map[string]interface{} `json:"geometry"`
+    Properties map[string]interface{} `json:"properties"`
+}
+
+// GeoJSON untuk koleksi fitur GeoJSON
+type GeoJSON struct {
+    Type     string           `json:"type"`
+    Features []GeoJSONFitur `json:"features"`
+}

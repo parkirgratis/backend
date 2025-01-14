@@ -8,7 +8,6 @@ import (
 	"github.com/gocroot/helper/at"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/model"
-	"github.com/whatsauth/itmodel"
 	"github.com/gocroot/helper"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -239,4 +238,38 @@ func SearchRoadsRegion(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	at.WriteJSON(respw, http.StatusOK, result)
+}
+
+func GetRegionsAsGeoJSON(respw http.ResponseWriter, req *http.Request) {
+    regions, err := atdb.GetAllDoc[[]model.Region](config.Mongoconn, "region", bson.M{})
+    if err != nil {
+        respw.WriteHeader(http.StatusInternalServerError)
+        respw.Write([]byte(`{"error": "Failed to fetch regions"}`))
+        return
+    }
+
+    // Membuat fitur GeoJSON untuk setiap region
+    features := make([]model.GeoJSONFitur, 0)
+    for _, region := range regions {
+        feature := model.GeoJSONFitur{
+            Type: "Feature",
+            Geometry: map[string]interface{}{
+                "type":        "Point",
+                "coordinates": []float64{region.Longitude, region.Latitude},
+            },
+            Properties: map[string]interface{}{
+                "name": region.Village,
+            },
+        }
+        features = append(features, feature)
+    }
+
+    // Membuat GeoJSON
+    geoJSON := model.GeoJSON{
+        Type:     "FeatureCollection",
+        Features: features,
+    }
+
+    // Mengirimkan GeoJSON ke frontend
+    helper.WriteJSON(respw, http.StatusOK, geoJSON)
 }

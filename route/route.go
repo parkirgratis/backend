@@ -41,9 +41,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 
 	case method == "POST" && path == "/tempat-parkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
-	case method == "GET" && path == "/data/region":
-		controller.GetRoadsAsGeoJSON(w, r)
 	case method == "GET" && path == "/data/roads":
+		controller.GetRoadsAsGeoJSON(w, r)
+	case method == "GET" && path == "/data/region":
 		controller.GetRegionsAsGeoJSON(w, r)
 
 

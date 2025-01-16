@@ -17,6 +17,9 @@ var AllowedOrigins = []string{
 	"https://jul003.github.io",
 	"https://farelnouval.github.io",
 	"https://irgifauzi.github.io",
+	"https://mhrndiva.github.io",
+	"https://deviwlndr.github.io",
+	"https://qintharganteng.github.io",
 }
 
 var AllowedHeaders = []string{

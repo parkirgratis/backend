@@ -89,7 +89,7 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 }
 
 
-
+//Dellete
 func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 	var deleteRequest struct {
 		ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`

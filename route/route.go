@@ -89,6 +89,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.DeleteKoordinatWarung(w, r)
 	case method == "POST" && path == "/data/marker-warung":
 		controller.PostKoordinatWarung(w, r)
+	case method == "GET" && path == "/data/search-namatempatwarung":
+		controller.GetByNamaTempatWarung(w, r)
 
 		//Location Nembak Endpoint Dari Petapedia
 	case method == "POST" && path == "/data/gis/lokasi":

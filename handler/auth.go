@@ -86,19 +86,16 @@ func SaveTokenToMongoWithParams(respw http.ResponseWriter, req *http.Request) er
 		Token   string `json:"token"`
 	}
 
-	// Parsing body JSON untuk mendapatkan admin_id dan token
 	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
 		return err
 	}
 
-	// Memastikan admin_id dan token tidak kosong
 	if reqData.AdminID == "" || reqData.Token == "" {
 		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Admin ID or Token is missing"})
 		return fmt.Errorf("admin ID or token is missing")
 	}
 
-	// Membuat token baru untuk penyimpanan
 	newToken := model.Token{
 		AdminID:   reqData.AdminID,
 		Token:     reqData.Token,
@@ -147,7 +144,7 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	// Kirim respons berhasil
+	
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"status": "Token deleted successfully"})
 	return nil
 }

@@ -183,7 +183,7 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Update markers if location changes
+	
 	if existingWarung.Lon != newWarung.Lon || existingWarung.Lat != newWarung.Lat {
 		markerId, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 		if err != nil {
@@ -193,7 +193,7 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 
 		filterMarker := bson.M{"_id": markerId}
 
-		// Remove old marker
+		
 		pullUpdate := bson.M{
 			"$pull": bson.M{
 				"markers": []float64{existingWarung.Lon, existingWarung.Lat},
@@ -205,7 +205,6 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// Add new marker
 		pushUpdate := bson.M{
 			"$push": bson.M{
 				"markers": []float64{newWarung.Lon, newWarung.Lat},

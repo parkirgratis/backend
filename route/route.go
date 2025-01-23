@@ -46,10 +46,6 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		// Rute untuk mengelola koordinat.
 	case method == "POST" && path == "/koordinat":
 		controller.PostKoordinat(w, r) // Menambahkan koordinat baru.
-	case method == "PUT" && path == "/data/koordinat":
-		controller.PutKoordinat(w, r) // Memperbarui data koordinat.
-	case method == "DELETE" && path == "/data/koordinat":
-		controller.DeleteKoordinat(w, r) // Menghapus koordinat.
 
 		// Rute untuk mengelola saran.
 	case method == "GET" && path == "/data/saran":

@@ -44,7 +44,10 @@ func PostUploadGithub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, _, err := ghupload.GithubUpload(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header, "parkirgratis", "filegambar", pathFile, false)
+	content, _, err := ghupload.GithubUpload(
+	gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header, "parkirgratis", "filegambar",
+    pathFile, false)
+
 	if err != nil {
 		fmt.Println("Error uploading file to GitHub:", err)
 		respn.Info = "gagal upload github"
@@ -97,7 +100,9 @@ func PutUpdateGithub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, _, err := ghupload.GithubUpload(gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header, "parkirgratis", "filegambar", pathFile, true)
+	content, _, err := ghupload.GithubUpload(
+    gh.GitHubAccessToken, gh.GitHubAuthorName, gh.GitHubAuthorEmail, header,
+	"parkirgratis", "filegambar", pathFile, true)
 	if err != nil {
 		fmt.Println("Error updating file on GitHub:", err)
 		respn.Info = "gagal update github"

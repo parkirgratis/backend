@@ -14,9 +14,11 @@ import (
 )
 
 func GetMarkerWarung(respw http.ResponseWriter, req *http.Request) {
-	mar, err := atdb.GetOneLatestDoc[model.KoordinatWarung](config.Mongoconn, "marker_warung", bson.M{})
+	mar, err := atdb.GetOneLatestDoc[model.KoordinatWarung](
+	config.Mongoconn, "marker_warung", bson.M{})
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": err.Error()})
 		return
 	}
 	helper.WriteJSON(respw, http.StatusOK, mar)
@@ -30,7 +32,8 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 
 
 	if err := json.NewDecoder(req.Body).Decode(&updateRequest); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -39,7 +42,8 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 		var err error
 		id, err = primitive.ObjectIDFromHex("67488d0a8589c79bf4ff6d77")
 		if err != nil {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Invalid default ID"})
+			helper.WriteJSON(respw, http.StatusInternalServerError,
+			 map[string]string{"error": "Invalid default ID"})
 			return
 		}
 	}
@@ -48,28 +52,33 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 	filter := bson.M{"_id": id}
 
 
-	doc, err := atdb.GetOneDoc[model.KoordinatWarung](config.Mongoconn, "marker_warung", filter)
+	doc, err := atdb.GetOneDoc[model.KoordinatWarung](
+	config.Mongoconn, "marker_warung", filter)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"error": "Document not found"})
+		helper.WriteJSON(respw, http.StatusNotFound,
+	 map[string]string{"error": "Document not found"})
 		return
 	}
 
 	if len(updateRequest.Markers) < 2 {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid marker data"})
+		helper.WriteJSON(respw, http.StatusBadRequest, 
+		map[string]string{"error": "Invalid marker data"})
 		return
 	}
 
 
 	var index int = -1
 	for i, marker := range doc.Markers {
-		if len(marker) == 2 && marker[0] == updateRequest.Markers[0][0] && marker[1] == updateRequest.Markers[0][1] {
+		if len(marker) == 2 && marker[0] == updateRequest.Markers[0][0] && 
+		marker[1] == updateRequest.Markers[0][1] {
 			index = i
 			break
 		}
 	}
 
 	if index == -1 {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Marker not found"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": "Marker not found"})
 		return
 	}
 
@@ -81,11 +90,13 @@ func PutKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 
 	_, err = atdb.UpdateOneArray(config.Mongoconn, "marker_warung", filter, update)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+	 map[string]string{"error": err.Error()})
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Coordinate updated"})
+	helper.WriteJSON(respw, http.StatusOK, 
+	map[string]string{"message": "Coordinate updated"})
 }
 
 
@@ -155,13 +166,15 @@ func DeleteKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 func PostKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 	var newKoor model.Koordinat
 	if err := json.NewDecoder(req.Body).Decode(&newKoor); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": err.Error()})
 		return
 	}
 
 	id, err := primitive.ObjectIDFromHex("67488d0a8589c79bf4ff6d77")
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid ID format"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": "Invalid ID format"})
 		return
 	}
 
@@ -170,7 +183,8 @@ func PostKoordinatWarung(respw http.ResponseWriter, req *http.Request) {
 
 	_, err = atdb.UpdateOneArray(config.Mongoconn, "marker_warung", filter, update)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"error": err.Error()})
 		return
 	}
 	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Markers updated"})

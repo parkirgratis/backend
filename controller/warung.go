@@ -53,18 +53,21 @@ func PostTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	if tempatWarung.Gambar != "" {
-		tempatWarung.Gambar = "https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + tempatWarung.Gambar
+		tempatWarung.Gambar = 
+	"https://raw.githubusercontent.com/parkirgratis/filegambar/main/img/" + tempatWarung.Gambar
 	}
 
 	result, err := config.Mongoconn.Collection("warung").InsertOne(context.Background(), tempatWarung)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError, 
+		itmodel.Response{Response: err.Error()})
 		return
 	}
 
 	insertedID := result.InsertedID.(primitive.ObjectID)
 
-	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{Response: fmt.Sprintf("Tempat warung berhasil disimpan dengan ID: %s", insertedID.Hex())})
+	helper.WriteJSON(respw, http.StatusOK, itmodel.Response{
+	Response: fmt.Sprintf("Tempat warung berhasil disimpan dengan ID: %s", insertedID.Hex())})
 }
 
 func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
@@ -73,37 +76,43 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid JSON data"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"message": "Invalid JSON data"})
 		return
 	}
 
 	objectId, err := primitive.ObjectIDFromHex(requestBody.ID)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid ID format"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"message": "Invalid ID format"})
 		return
 	}
 
 	var tempat model.Warung
 	err = atdb.FindOneDoc(config.Mongoconn, "warung", bson.M{"_id": objectId}).Decode(&tempat)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Tempat warung not found"})
+		helper.WriteJSON(respw, http.StatusNotFound, 
+		map[string]string{"message": "Tempat warung not found"})
 		return
 	}
 
 	deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "warung", bson.M{"_id": objectId})
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete document", "error": err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError, 
+		map[string]string{"message": "Failed to delete document", "error": err.Error()})
 		return
 	}
 
 	if deleteResult.DeletedCount == 0 {
-		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"message": "Document not found"})
+		helper.WriteJSON(respw, http.StatusNotFound, 
+		map[string]string{"message": "Document not found"})
 		return
 	}
 
 	markerId, err := primitive.ObjectIDFromHex("67488d0a8589c79bf4ff6d77")
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
 		return
 	}
 
@@ -116,11 +125,13 @@ func DeleteTempatWarungById(respw http.ResponseWriter, req *http.Request) {
 
 	_, err = atdb.UpdateOneArray(config.Mongoconn, "marker_warung", filter, update)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to update markers", "error": err.Error()})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"message": "Failed to update markers", "error": err.Error()})
 		return
 	}
 
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Tempat Warung and markers deleted successfully"})
+	helper.WriteJSON(respw, http.StatusOK, 
+	map[string]string{"message": "Tempat Warung and markers deleted successfully"})
 }
 
 func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
@@ -187,7 +198,8 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 	if existingWarung.Lon != newWarung.Lon || existingWarung.Lat != newWarung.Lat {
 		markerId, err := primitive.ObjectIDFromHex("669510e39590720071a5691d")
 		if err != nil {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
+			helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"message": "Invalid ObjectID format", "error": err.Error()})
 			return
 		}
 
@@ -201,7 +213,8 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 		}
 		_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", filterMarker, pullUpdate)
 		if err != nil {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to remove old marker", "error": err.Error()})
+			helper.WriteJSON(respw, http.StatusInternalServerError,
+			 map[string]string{"message": "Failed to remove old marker", "error": err.Error()})
 			return
 		}
 
@@ -212,7 +225,8 @@ func PutTempatWarung(respw http.ResponseWriter, req *http.Request) {
 		}
 		_, err = atdb.UpdateOneArray(config.Mongoconn, "marker", pushUpdate, pushUpdate)
 		if err != nil {
-			helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to add new marker", "error": err.Error()})
+			helper.WriteJSON(respw, http.StatusInternalServerError,
+			 map[string]string{"message": "Failed to add new marker", "error": err.Error()})
 			return
 		}
 	}

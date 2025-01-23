@@ -7,7 +7,7 @@ import (
 )
 
 var MongoString string = os.Getenv("MONGOSTRING")
-
+//mongostring
 var mongoinfo = atdb.DBInfo{
 	DBString: MongoString,
 	DBName:   "parkir_db",

@@ -19,7 +19,7 @@ var AllowedOrigins = []string{
 	"https://irgifauzi.github.io",
 	"https://mhrndiva.github.io",
 	"https://deviwlndr.github.io",
-	"https://qinthargantheng.github.io",
+	"https://qintharganteng.github.io",
 	"https://serlip06.github.io",
 	"https://agung6544.github.io",
 	"https://yoginara.github.io",

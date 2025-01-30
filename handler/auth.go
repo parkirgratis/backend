@@ -23,7 +23,8 @@ func GetAdminByUsername(respw http.ResponseWriter, req *http.Request) error {
 	username := req.URL.Query().Get("username") 
 
 	if config.ErrorMongoconn != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+	 map[string]string{"error": "Failed to connect to database"})
 		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
 	}
 
@@ -51,12 +52,14 @@ func GetAdminIDFromToken(respw http.ResponseWriter, req *http.Request) error {
 
 	adminID := req.URL.Query().Get("admin_id")
 	if adminID == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Admin ID is missing"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"error": "Admin ID is missing"})
 		return fmt.Errorf("admin ID is missing")
 	}
 
 	if config.ErrorMongoconn != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"error": "Failed to connect to database"})
 		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
 	}
 
@@ -67,7 +70,8 @@ func GetAdminIDFromToken(respw http.ResponseWriter, req *http.Request) error {
 	err := atdb.FindOne(ctx, adminCollection, bson.M{"admin_id": adminID}, &admin)
 	if err != nil {
 		// Jika admin_id tidak ditemukan
-		helper.WriteJSON(respw, http.StatusNotFound, map[string]string{"error": "Admin ID not found"})
+		helper.WriteJSON(respw, http.StatusNotFound,
+	     map[string]string{"error": "Admin ID not found"})
 		return fmt.Errorf("admin ID not found: %w", err)
 	}
 
@@ -87,12 +91,14 @@ func SaveTokenToMongoWithParams(respw http.ResponseWriter, req *http.Request) er
 	}
 
 	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+	     map[string]string{"message": "Invalid request body"})
 		return err
 	}
 
 	if reqData.AdminID == "" || reqData.Token == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Admin ID or Token is missing"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		 map[string]string{"message": "Admin ID or Token is missing"})
 		return fmt.Errorf("admin ID or token is missing")
 	}
 
@@ -114,7 +120,8 @@ func SaveTokenToMongoWithParams(respw http.ResponseWriter, req *http.Request) er
 	
 	_, err := collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to save token"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"message": "Failed to save token"})
 		return fmt.Errorf("failed to save token: %w", err)
 	}
 
@@ -129,7 +136,8 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 
 	
 	if err := json.NewDecoder(req.Body).Decode(&reqData); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"error": "Invalid JSON format"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		map[string]string{"error": "Invalid JSON format"})
 		return err
 	}
 
@@ -140,12 +148,14 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 
 	_, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to delete token"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+	    map[string]string{"error": "Failed to delete token"})
 		return err
 	}
 
 	
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"status": "Token deleted successfully"})
+	helper.WriteJSON(respw, http.StatusOK,
+     map[string]string{"status": "Token deleted successfully"})
 	return nil
 }
 
@@ -153,24 +163,30 @@ func DeleteTokenFromMongo(respw http.ResponseWriter, req *http.Request) error {
 func Login(respw http.ResponseWriter, req *http.Request) {
     var loginDetails model.Admin
     if err := json.NewDecoder(req.Body).Decode(&loginDetails); err != nil {
-        helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+        helper.WriteJSON(respw, http.StatusBadRequest,
+	 map[string]string{"message": "Invalid request body"})
         return
     }
 
     var storedAdmin model.Admin
-    if err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
-        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+    if err := atdb.FindOne(context.Background(),
+    config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username},
+	 &storedAdmin); err != nil {
+        helper.WriteJSON(respw, http.StatusUnauthorized,
+	     map[string]string{"message": "Invalid credentials"})
         return
     }
 
     if !config.CheckPasswordHash(loginDetails.Password, storedAdmin.Password) {
-        helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+        helper.WriteJSON(respw, http.StatusUnauthorized,
+	 map[string]string{"message": "Invalid credentials"})
         return
     }
 
     token, err := config.GenerateJWT(storedAdmin.ID.Hex())
     if err != nil {
-        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not generate token"})
+        helper.WriteJSON(respw, http.StatusInternalServerError,
+	     map[string]string{"message": "Could not generate token"})
         return
     }
 
@@ -184,12 +200,14 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 
     _, err = collection.InsertOne(ctx, newToken)
     if err != nil {
-        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Could not save token"})
+        helper.WriteJSON(respw, http.StatusInternalServerError,
+	 map[string]string{"message": "Could not save token"})
         return
     }
 
     if err := controller.LogActivity(storedAdmin.Username); err != nil {
-        helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to log login activity"})
+        helper.WriteJSON(respw, http.StatusInternalServerError,
+	 map[string]string{"message": "Failed to log login activity"})
         return
     }
 
@@ -203,13 +221,15 @@ func Login(respw http.ResponseWriter, req *http.Request) {
 func Logout(respw http.ResponseWriter, req *http.Request) {
 	authHeader := req.Header.Get("Authorization")
 	if authHeader == "" {
-		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Authorization header missing"})
+		helper.WriteJSON(respw, http.StatusUnauthorized,
+		 map[string]string{"message": "Authorization header missing"})
 		return
 	}
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 	if token == "" {
-		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid token format"})
+		helper.WriteJSON(respw, http.StatusUnauthorized,
+	 map[string]string{"message": "Invalid token format"})
 		return
 	}
 
@@ -221,12 +241,14 @@ func Logout(respw http.ResponseWriter, req *http.Request) {
 
 	_, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete token"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+	     map[string]string{"message": "Failed to delete token"})
 		return
 	}
 
 	// Kirim respons berhasil
-	helper.WriteJSON(respw, http.StatusOK, map[string]string{"message": "Logout successful"})
+	helper.WriteJSON(respw, http.StatusOK,
+     map[string]string{"message": "Logout successful"})
 }
 
 
@@ -255,28 +277,34 @@ func RegisterAdmin(respw http.ResponseWriter, req *http.Request) {
 	var adminDetails model.Admin
 	
 	if err := json.NewDecoder(req.Body).Decode(&adminDetails); err != nil {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Invalid request body"})
+		helper.WriteJSON(respw, http.StatusBadRequest,
+		map[string]string{"message": "Invalid request body"})
 		return
 	}
 
 	
 	if adminDetails.Username == "" || adminDetails.Password == "" {
-		helper.WriteJSON(respw, http.StatusBadRequest, map[string]string{"message": "Username and password are required"})
+		helper.WriteJSON(respw, http.StatusBadRequest, 
+		map[string]string{"message": "Username and password are required"})
 		return
 	}
 
 	
 	var existingAdmin model.Admin
-	err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": adminDetails.Username}, &existingAdmin)
+	err := atdb.FindOne(context.Background(),
+ 	config.Mongoconn.Collection("admin"), bson.M{"username": adminDetails.Username},
+  	&existingAdmin)
 	if err == nil {
-		helper.WriteJSON(respw, http.StatusConflict, map[string]string{"message": "Username already exists"})
+		helper.WriteJSON(respw, http.StatusConflict,
+	 map[string]string{"message": "Username already exists"})
 		return
 	}
 
 
 	hashedPassword, err := config.HashPassword(adminDetails.Password)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to hash password"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+		 map[string]string{"message": "Failed to hash password"})
 		return
 	}
 
@@ -293,7 +321,8 @@ func RegisterAdmin(respw http.ResponseWriter, req *http.Request) {
 	
 	_, err = collection.InsertOne(ctx, newAdmin)
 	if err != nil {
-		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to register admin"})
+		helper.WriteJSON(respw, http.StatusInternalServerError,
+	 map[string]string{"message": "Failed to register admin"})
 		return
 	}
 

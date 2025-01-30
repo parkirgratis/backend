@@ -192,13 +192,6 @@ func InsertManyDocs[T any](db *mongo.Database, collection string, docs []T) (ins
 	return insertResult.InsertedIDs, nil
 }
 
-// With UpdateOneDoc() allows for updating fields, new fields can be added without losing the fields in the old document.
-//
-//	updatefields := bson.M{
-//		"token":         token.AccessToken,
-//		"refresh_token": token.RefreshToken,
-//		"expiry":        token.Expiry,
-//	}
 func UpdateOneDoc(db *mongo.Database, collection string, filter bson.M, update bson.M) (*mongo.UpdateResult, error) {
     if len(update) == 0 {
         return nil, fmt.Errorf("update cannot be empty")

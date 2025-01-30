@@ -24,6 +24,8 @@ var AllowedOrigins = []string{
 	"https://agung6544.github.io",
 	"https://yoginara.github.io",
 	"https://barganakukuhraditya.github.io",
+	"https://nidasakinaa.github.io",
+
 }
 
 var AllowedHeaders = []string{

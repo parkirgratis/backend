@@ -73,7 +73,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostTempatWarung(w, r) // Menambahkan data warung.
 	case method == "GET" && path == "/data/warung":
 		controller.GetaAllWarung(w, r) // Mendapatkan semua data warung.
-	case method == "DELETE" && path == "/data/warung":
+	case method == "DELETE" && path == "/data/deletewarung":
 		controller.DeleteTempatWarungById(w, r) // Delete data warung berdasarkan Id.
 	case method == "PUT" && path == "/data/warung":
 		controller.PutTempatWarung(w, r) // Update/Edit data warung berdasarkan Id.

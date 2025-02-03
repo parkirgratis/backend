@@ -89,9 +89,9 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetByNamaTempatWarung(w, r)
 
 		//Location Nembak Endpoint Dari Petapedia
-	case method == "POST" && path == "/data/gis/lokasi":
+	case method == "POST" && path == "/data/gis/lokasiparkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
-	case method == "POST" && path == "/data/gis/warung":
+	case method == "POST" && path == "/data/gis/lokasiwarung":
 		controller.InsertDataRegionFromPetapdiaWarung(w, r)
 	case method == "POST" && path == "/data/gis/jalan":
 		controller.GetRoads(w, r)

@@ -25,6 +25,7 @@ var AllowedOrigins = []string{
 	"https://yoginara.github.io",
 	"https://barganakukuhraditya.github.io",
 	"https://nidasakinaa.github.io",
+	"https://hammiahlan.github.io",
 
 }
 

@@ -27,6 +27,11 @@ var AllowedOrigins = []string{
 	"https://nidasakinaa.github.io",
 	"https://hammiahlan.github.io",
 
+	"https://ramenkk.github.io",
+	"https://menu.github.io",
+	"https://ramenkk.github.io/kasir/",
+	"https://irgifauzi.github.io",
+	"https://irgifauzi.github.io/P2_kasir/",
 }
 
 var AllowedHeaders = []string{

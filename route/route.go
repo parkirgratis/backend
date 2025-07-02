@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/controller"
@@ -37,11 +38,10 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "DELETE" && path == "/data/tempat":
 		controller.DeleteTempatParkir(w, r) // Menghapus tempat parkir.
 	case method == "POST" && path == "/upload/img":
-		controller.PostUploadGithub(w, r) 
+		controller.PostUploadGithub(w, r)
 
 	case method == "POST" && path == "/tempat-parkir":
 		controller.InsertDataRegionFromPetapdia(w, r)
-
 
 		// Rute untuk mengelola koordinat.
 	case method == "POST" && path == "/koordinat":
@@ -97,8 +97,6 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetRoads(w, r)
 	case method == "POST" && path == "/data/gis/region":
 		controller.GetRegion(w, r)
-	
-
 
 	// Rute untuk webhook dengan parameter dinamis.
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
@@ -147,7 +145,81 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostDataUserFromWA(w, r)
 
 	case method == "POST" && helper.URLParam(path, "/upload/:path"):
-        controller.PostUploadGithub(w, r)
+		controller.PostUploadGithub(w, r)
+
+		//ramennn
+		// endpoint menu ramen
+	case method == "GET" && path == "/data/menu_ramen":
+		controller.GetMenu_ramen(w, r)
+
+	case method == "PUT" && path == "/ubah/menu_ramen":
+		controller.PutMenu(w, r)
+
+	case method == "GET" && path == "/menu/byid":
+		controller.GetMenuByID(w, r)
+
+	case method == "GET" && path == "/data/ramen":
+		controller.GetMenu_ramenflutter(w, r)
+
+	case method == "POST" && path == "/tambah/menu_ramen":
+		controller.Postmenu_ramen(w, r)
+
+	case method == "PUT" && strings.HasPrefix(path, "/ubah/byid/"):
+		// Extract the ID from the path
+		id := strings.TrimPrefix(path, "/ubah/byid/")
+		// Call the PutMenu function with the extracted ID
+		controller.PutMenuflutter(w, r, id)
+
+	case method == "DELETE" && path == "/hapus/menu_ramen":
+		controller.DeleteMenu(w, r)
+
+	case method == "DELETE" && strings.HasPrefix(path, "/hapus/byid/"):
+		// Ambil ID dari URL
+		id := strings.TrimPrefix(path, "/hapus/byid/")
+		// Panggil fungsi DeleteMenu dengan ID dari URL
+		controller.DeleteMenuflutter(w, r, id)
+
+		// endpoint pesanan
+	case method == "GET" && path == "/data/pesanan":
+		controller.GetPesanan(w, r)
+	case method == "GET" && path == "/data/byid":
+		controller.GetPesananByID(w, r)
+
+	case method == "GET" && path == "/data/bystatus":
+		controller.GetPesananByStatus(w, r)
+
+	case method == "GET" && path == "/data/bystatus/flutter":
+		controller.GetPesananByStatusflutter(w, r)
+
+	case method == "POST" && path == "/tambah/pesanan":
+		controller.PostPesanan(w, r)
+	case method == "PATCH" && path == "/update/status":
+		controller.UpdatePesananStatus(w, r)
+
+		// endpoint item pesanan
+		controller.GetItemPesanan(w, r)
+	case method == "POST" && path == "/tambah/item_pesanan":
+		controller.PostItemPesanan(w, r)
+	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
+		controller.PostInboxNomor(w, r)
+
+		// Rute untuk admin (login, logout, register, dashboard, aktivitas).
+	case method == "POST" && path == "/admin/login":
+		handler.Logins(w, r) // Login admin.
+	case method == "GET" && path == "/data/activity":
+		controller.GetActivity(w, r)
+	case method == "GET" && path == "/data/admin":
+		handler.GetAllAdmins(w, r)
+	case method == "POST" && path == "/admin/logout":
+		handler.Logouts(w, r) // Logout admin.
+	case method == "POST" && path == "/admin/register":
+		handler.RegisterAdmins(w, r) // Registrasi admin baru.
+	case method == "GET" && path == "/admin/dashboard":
+
+	case method == "PUT" && path == "/update/password":
+		handler.UpdateForgottenPassword(w, r) // Login admin.
+		// Middleware autentikasi untuk dashboard admin.
+		middleware.AuthMiddleware(http.HandlerFunc(handler.DashboardAdmins)).ServeHTTP(w, r)
 
 	// Rute default untuk request yang tidak dikenali.
 	default:

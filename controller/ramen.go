@@ -23,7 +23,7 @@ import (
 // hahay
 func GetMenu_ramen(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
-	resto, err := atdb.GetAllDoc[[]model.Menus](config.Mongoconn, "menu_ramen", bson.M{})
+	resto, err := atdb.GetAllDoc[[]model.Menus](config.RamenConn, "menu_ramen", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteJSON(respw, http.StatusBadRequest, resp)
@@ -38,7 +38,7 @@ func GetMenu_ramenflutter(respw http.ResponseWriter, req *http.Request) {
 		Data    interface{} `json:"data,omitempty"`
 	}
 
-	resto, err := atdb.GetAllDoc[[]model.Menu](config.Mongoconn, "menu_ramen", bson.M{})
+	resto, err := atdb.GetAllDoc[[]model.Menu](config.RamenConn, "menu_ramen", bson.M{})
 	if err != nil {
 		resp.Status = "error"
 		resp.Message = err.Error()
@@ -69,7 +69,7 @@ func GetMenuByOutletID(respw http.ResponseWriter, req *http.Request) {
 	filter := bson.M{"outlet_id": objID}
 
 	var menu []model.Menu
-	menu, err = atdb.GetFilteredDocs[[]model.Menu](config.Mongoconn, "menu_ramen", filter, nil)
+	menu, err = atdb.GetFilteredDocs[[]model.Menu](config.RamenConn, "menu_ramen", filter, nil)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			respondWithError(respw, http.StatusNotFound, "Menu tidak ditemukan untuk outlet ini")
@@ -128,7 +128,7 @@ func Postmenu_ramen(respw http.ResponseWriter, req *http.Request) {
 	restoran.Kategori = html.EscapeString(restoran.Kategori)
 
 	// Simpan data yang sudah disanitasi ke dalam database
-	result, err := config.Mongoconn.Collection("menu_ramen").InsertOne(context.Background(), restoran)
+	result, err := config.RamenConn.Collection("menu_ramen").InsertOne(context.Background(), restoran)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
 		return
@@ -180,7 +180,7 @@ func PutMenuflutter(respw http.ResponseWriter, req *http.Request, id string) {
 	fmt.Println("Filter:", filter)
 	fmt.Println("Update:", updateFields)
 
-	result, err := atdb.UpdateOneDoc(config.Mongoconn, "menu_ramen", filter, updateFields)
+	result, err := atdb.UpdateOneDoc(config.RamenConn, "menu_ramen", filter, updateFields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return
@@ -223,7 +223,7 @@ func PutMenu(respw http.ResponseWriter, req *http.Request) {
 	fmt.Println("Filter:", filter)
 	fmt.Println("Update:", updateFields)
 
-	result, err := atdb.UpdateOneDoc(config.Mongoconn, "menu_ramen", filter, updateFields)
+	result, err := atdb.UpdateOneDoc(config.RamenConn, "menu_ramen", filter, updateFields)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, err.Error())
 		return
@@ -258,7 +258,7 @@ func DeleteMenu(respw http.ResponseWriter, req *http.Request) {
 	// Create filter
 	filter := bson.M{"_id": objectId}
 
-	deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "menu_ramen", filter)
+	deleteResult, err := atdb.DeleteOneDoc(config.RamenConn, "menu_ramen", filter)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to delete document", "error": err.Error()})
 		return
@@ -287,7 +287,7 @@ func DeleteMenuflutter(respw http.ResponseWriter, req *http.Request, id string) 
 	// Membuat filter berdasarkan ID
 	filter := bson.M{"_id": objectID}
 
-	deleteResult, err := atdb.DeleteOneDoc(config.Mongoconn, "menu_ramen", filter)
+	deleteResult, err := atdb.DeleteOneDoc(config.RamenConn, "menu_ramen", filter)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]interface{}{
 			"status":  "error",
@@ -319,7 +319,7 @@ func DeleteMenuflutter(respw http.ResponseWriter, req *http.Request, id string) 
 
 func GetPesanan(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
-	orders, err := atdb.GetAllDoc[[]model.Pesanan](config.Mongoconn, "pesanan", bson.M{})
+	orders, err := atdb.GetAllDoc[[]model.Pesanan](config.RamenConn, "pesanan", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteJSON(respw, http.StatusBadRequest, resp)
@@ -348,7 +348,7 @@ func GetPesananByOutletID(respw http.ResponseWriter, req *http.Request) {
 
 	// Ambil data pesanan dari koleksi
 	var pesanan []model.Pesanan
-	pesanan, err = atdb.GetFilteredDocs[[]model.Pesanan](config.Mongoconn, "pesanan", filter, nil)
+	pesanan, err = atdb.GetFilteredDocs[[]model.Pesanan](config.RamenConn, "pesanan", filter, nil)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			respondWithError(respw, http.StatusNotFound, "Pesanan tidak ditemukan untuk outlet ini")
@@ -399,7 +399,7 @@ func GetPesananByID(respw http.ResponseWriter, req *http.Request) {
 	// Filter berdasarkan ID
 	filter := bson.M{"_id": objID}
 	var pesanan []model.Pesanan
-	pesanan, err = atdb.GetFilteredDocs[[]model.Pesanan](config.Mongoconn, "pesanan", filter, nil)
+	pesanan, err = atdb.GetFilteredDocs[[]model.Pesanan](config.RamenConn, "pesanan", filter, nil)
 	if err != nil || len(pesanan) == 0 {
 		if err == mongo.ErrNoDocuments || len(pesanan) == 0 {
 			respondWithError(respw, http.StatusNotFound, "Pesanan tidak ditemukan")
@@ -440,7 +440,7 @@ func GetMenuByID(respw http.ResponseWriter, req *http.Request) {
 	// Filter berdasarkan ID
 	filter := bson.M{"_id": objID}
 	var menu []model.Menus
-	menu, err = atdb.GetFilteredDocs[[]model.Menus](config.Mongoconn, "menu_ramen", filter, nil)
+	menu, err = atdb.GetFilteredDocs[[]model.Menus](config.RamenConn, "menu_ramen", filter, nil)
 	if err != nil || len(menu) == 0 {
 		if err == mongo.ErrNoDocuments || len(menu) == 0 {
 			respondWithError(respw, http.StatusNotFound, "Menu tidak ditemukan")
@@ -488,7 +488,7 @@ func GetPesananByStatus(respw http.ResponseWriter, req *http.Request) {
 	fmt.Println("Filter untuk MongoDB:", filter)
 
 	var pesanan []model.Pesanan
-	pesanan, err := atdb.GetFilteredDocs[[]model.Pesanan](config.Mongoconn, "pesanan", filter, nil)
+	pesanan, err := atdb.GetFilteredDocs[[]model.Pesanan](config.RamenConn, "pesanan", filter, nil)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			http.Error(respw, "Pesanan tidak ditemukan dengan status ini", http.StatusNotFound)
@@ -535,7 +535,7 @@ func GetPesananByStatusflutter(respw http.ResponseWriter, req *http.Request) {
 	filter := bson.M{"status_pesanan": status}
 
 	var pesanan []model.Pesanan
-	pesanan, err := atdb.GetFilteredDocs[[]model.Pesanan](config.Mongoconn, "pesanan", filter, nil)
+	pesanan, err := atdb.GetFilteredDocs[[]model.Pesanan](config.RamenConn, "pesanan", filter, nil)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			resp.Status = "error"
@@ -577,7 +577,7 @@ func PostPesanan(respw http.ResponseWriter, req *http.Request) {
 
 	log.Println("Pesanan data received:", pesanan)
 
-	result, err := config.Mongoconn.Collection("pesanan").InsertOne(context.Background(), pesanan)
+	result, err := config.RamenConn.Collection("pesanan").InsertOne(context.Background(), pesanan)
 	if err != nil {
 		log.Println("Error inserting pesanan:", err)
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: "Failed to insert pesanan"})
@@ -598,7 +598,7 @@ func PostPesanan(respw http.ResponseWriter, req *http.Request) {
 
 func GetItemPesanan(respw http.ResponseWriter, req *http.Request) {
 	var resp itmodel.Response
-	items, err := atdb.GetAllDoc[[]model.ItemPesanan](config.Mongoconn, "item_pesanan", bson.M{})
+	items, err := atdb.GetAllDoc[[]model.ItemPesanan](config.RamenConn, "item_pesanan", bson.M{})
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteJSON(respw, http.StatusBadRequest, resp)
@@ -614,7 +614,7 @@ func PostItemPesanan(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	result, err := config.Mongoconn.Collection("item_pesanan").InsertOne(context.Background(), item)
+	result, err := config.RamenConn.Collection("item_pesanan").InsertOne(context.Background(), item)
 	if err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, itmodel.Response{Response: err.Error()})
 		return
@@ -647,7 +647,7 @@ func CompleteOrder(respw http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	result, err := config.Mongoconn.Collection("pesanan").UpdateOne(context.Background(), filter, update)
+	result, err := config.RamenConn.Collection("pesanan").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		http.Error(respw, fmt.Sprintf("Terjadi kesalahan: %v", err), http.StatusInternalServerError)
 		return
@@ -694,7 +694,7 @@ func UpdatePesananStatus(respw http.ResponseWriter, req *http.Request) {
 	filter := bson.M{"_id": objectID}
 	update := bson.M{"$set": bson.M{"status_pesanan": requestBody.StatusPesanan}}
 
-	result, err := config.Mongoconn.Collection("pesanan").UpdateOne(context.Background(), filter, update)
+	result, err := config.RamenConn.Collection("pesanan").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		http.Error(respw, fmt.Sprintf(`{"error": "Terjadi kesalahan pada server: %v"}`, err), http.StatusInternalServerError)
 		return

@@ -24,12 +24,12 @@ func GetAdminByUsernames(respw http.ResponseWriter, req *http.Request) error {
 	var admin model.Admins
 	username := req.URL.Query().Get("username")
 
-	if config.ErrorMongoconn != nil {
+	if config.ErrorRamenConn != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
-		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+		return fmt.Errorf("failed to connect to database: %w", config.ErrorRamenConn)
 	}
 
-	adminCollection := config.Mongoconn.Collection("admin")
+	adminCollection := config.RamenConn.Collection("admin")
 	ctx := context.Background()
 
 	err := atdb.FindOne(ctx, adminCollection, bson.M{"username": username}, &admin)
@@ -55,12 +55,12 @@ func GetAdminIDFromTokens(respw http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("admin ID is missing")
 	}
 
-	if config.ErrorMongoconn != nil {
+	if config.ErrorRamenConn != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"error": "Failed to connect to database"})
-		return fmt.Errorf("failed to connect to database: %w", config.ErrorMongoconn)
+		return fmt.Errorf("failed to connect to database: %w", config.ErrorRamenConn)
 	}
 
-	adminCollection := config.Mongoconn.Collection("tokens")
+	adminCollection := config.RamenConn.Collection("tokens")
 	ctx := context.Background()
 
 	// Mencari admin berdasarkan admin_id
@@ -103,7 +103,7 @@ func SaveTokenToMongoWithParamss(respw http.ResponseWriter, req *http.Request) e
 		CreatedAt: time.Now(),
 	}
 
-	collection := config.Mongoconn.Collection("tokens")
+	collection := config.RamenConn.Collection("tokens")
 	ctx := context.Background()
 
 	filter := bson.M{"admin_id": newToken.AdminID}
@@ -130,7 +130,7 @@ func DeleteTokenFromMongos(respw http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	collection := config.Mongoconn.Collection("tokens")
+	collection := config.RamenConn.Collection("tokens")
 	ctx := context.Background()
 
 	filter := bson.M{"token": reqData.Token}
@@ -184,7 +184,7 @@ func Logins(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	var storedAdmin model.Admins
-	if err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
+	if err := atdb.FindOne(context.Background(), config.RamenConn.Collection("admin"), bson.M{"username": loginDetails.Username}, &storedAdmin); err != nil {
 		incrementFailedAttempts(loginDetails.Username) // Tambah ke gagal login
 		helper.WriteJSON(respw, http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 		return
@@ -206,7 +206,7 @@ func Logins(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	collection := config.Mongoconn.Collection("tokens")
+	collection := config.RamenConn.Collection("tokens")
 	ctx := context.Background()
 	newToken := model.Tokens{
 		AdminID:   storedAdmin.ID.Hex(),
@@ -283,7 +283,7 @@ func Logouts(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	collection := config.Mongoconn.Collection("tokens")
+	collection := config.RamenConn.Collection("tokens")
 	ctx := context.Background()
 
 	filter := bson.M{"token": token}
@@ -353,7 +353,7 @@ func RegisterAdmins(respw http.ResponseWriter, req *http.Request) {
 
 	// Check if username already exists in the database
 	var existingAdmin model.Admins
-	err := atdb.FindOne(context.Background(), config.Mongoconn.Collection("admin"), bson.M{"username": adminDetails.Username}, &existingAdmin)
+	err := atdb.FindOne(context.Background(), config.RamenConn.Collection("admin"), bson.M{"username": adminDetails.Username}, &existingAdmin)
 	if err == nil {
 		helper.WriteJSON(respw, http.StatusConflict, map[string]string{"message": "Username already exists"})
 		return
@@ -374,7 +374,7 @@ func RegisterAdmins(respw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Insert the new admin into the database
-	collection := config.Mongoconn.Collection("admin")
+	collection := config.RamenConn.Collection("admin")
 	ctx := context.Background()
 
 	_, err = collection.InsertOne(ctx, newAdmin)
@@ -448,7 +448,7 @@ func UpdateForgottenPassword(respw http.ResponseWriter, req *http.Request) {
 
 	// Check if username exists in the database
 	var existingAdmin model.Admins
-	collection := config.Mongoconn.Collection("admin")
+	collection := config.RamenConn.Collection("admin")
 	ctx := context.Background()
 
 	err := collection.FindOne(ctx, bson.M{"username": updateRequest.Username}).Decode(&existingAdmin)
@@ -485,7 +485,7 @@ func UpdateForgottenPassword(respw http.ResponseWriter, req *http.Request) {
 
 func GetAllAdmins(respw http.ResponseWriter, req *http.Request) {
 	// Mendapatkan koneksi ke collection "admin"
-	collection := config.Mongoconn.Collection("admin")
+	collection := config.RamenConn.Collection("admin")
 	ctx := context.Background()
 
 	// Mencari semua data admin dalam collection

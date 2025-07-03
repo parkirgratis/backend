@@ -220,7 +220,7 @@ func Logins(respw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := controller.LogActivity(storedAdmin.Username); err != nil {
+	if err := controller.LogActivityss(storedAdmin.Username); err != nil {
 		helper.WriteJSON(respw, http.StatusInternalServerError, map[string]string{"message": "Failed to log login activity"})
 		return
 	}
@@ -246,8 +246,8 @@ func failedAttemptsExceeded(username string) bool {
 
 	// Cek apakah user masih dalam masa blokir
 	if attempts >= maxFailedAttempts {
-		lastAttempt, _ := attemptTimestamps[username]
-		if time.Since(lastAttempt) < lockoutDuration {
+		lastAttempts, _ := attemptTimestamps[username]
+		if time.Since(lastAttempts) < lockoutDuration {
 			return true
 		}
 		// Reset jika sudah lewat waktu blokir

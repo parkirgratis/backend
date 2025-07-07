@@ -204,17 +204,18 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostInboxNomor(w, r)
 
 		// Rute untuk admin (login, logout, register, dashboard, aktivitas).
-	case method == "POST" && path == "/admin/login":
+	case method == "POST" && path == "/admin/logins":
 		handler.Logins(w, r) // Login admin.
-	case method == "GET" && path == "/data/activity":
+	case method == "GET" && path == "/data/activitys":
 		controller.GetActivity(w, r)
 	case method == "GET" && path == "/data/admin":
 		handler.GetAllAdmins(w, r)
-	case method == "POST" && path == "/admin/logout":
+	case method == "POST" && path == "/admin/logouts":
 		handler.Logouts(w, r) // Logout admin.
-	case method == "POST" && path == "/admin/register":
+	case method == "POST" && path == "/admin/registers":
 		handler.RegisterAdmins(w, r) // Registrasi admin baru.
-	case method == "GET" && path == "/admin/dashboard":
+		
+	case method == "GET" && path == "/admin/dashboards":
 
 	case method == "PUT" && path == "/update/password":
 		handler.UpdateForgottenPassword(w, r) // Login admin.

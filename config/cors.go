@@ -32,6 +32,7 @@ var AllowedOrigins = []string{
 	"https://ramenkk.github.io/kasir/",
 	"https://irgifauzi.github.io",
 	"https://irgifauzi.github.io/P2_kasir/",
+	
 }
 
 var AllowedHeaders = []string{
@@ -63,7 +64,7 @@ func SetAccessControlHeaders(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS, PATCH")
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(AllowedHeaders, ", "))
 	w.Header().Set("Access-Control-Allow-Origin", origin)
 
